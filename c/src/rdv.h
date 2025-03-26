@@ -1,11 +1,12 @@
 #ifndef _RDV
-
 #define _RDV
-#include "c/src/lieu.h"
+
+#include "src/lieu.h"
+
 typedef struct rdv
 {
-    rdv *next;
+    struct rdv *next;
     Lieu *lieu;
-}Rdv;
+} Rdv;
 
 #endif

@@ -1,7 +1,7 @@
 #ifndef _LIEU
 
 #define _LIEU
-#include "c/src/coord.h"
+#include "src/coord.h"
 typedef struct lieu
 {
 
