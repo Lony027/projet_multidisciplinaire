@@ -1,8 +1,9 @@
 #ifndef _RDV
-
 #define _RDV
-#include "c/src/lieu.h"
-typedef struct rd
+
+#include "src/lieu.h"
+
+typedef struct rdv
 {
     struct rdv *next;
     Lieu *lieu;
