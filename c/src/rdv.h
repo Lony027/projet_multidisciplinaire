@@ -2,10 +2,10 @@
 
 #define _RDV
 #include "c/src/lieu.h"
-typedef struct rdv
+typedef struct rd
 {
-    rdv *next;
+    struct rdv *next;
     Lieu *lieu;
-}Rdv;
+} Rdv;
 
 #endif
