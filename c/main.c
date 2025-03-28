@@ -1,15 +1,11 @@
-#include <stdlib.h>
-
-#include "src/matrice.h"
+#include "src/matrix.h"
 
 int main() {
-    Matrice *m = malloc(sizeof(Matrice));
-    create_matrice(m, 10);
+    Matrix *m = open_csv_matrix("../mock_distance.csv");
+    print_matrix(m);
 
-    open_csv_matrice("../mock.csv", m);
-    print_matrice(m);
-
-    free_matrice(m);
+    free_matrix(m);
 
     return 0;
 }
+
