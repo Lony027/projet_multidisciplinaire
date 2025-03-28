@@ -1,13 +1,13 @@
 #include <stdlib.h>
 
 #include "src/matrice.h"
-#include "src/lieu.h"
+#include "src/place.h"
 
-int test_lieu_module()
+void test_lieu_module()
 {
-    Liste new = open_csv_lieu("mock.csv");
-    print_liste(new);
-    free_liste(&new);
+    List new = open_csv_place("mock.csv");
+    print_list(new);
+    free_list(&new);
 }
 
 int main()
@@ -23,4 +23,6 @@ int main()
 
     freeMatrix(m);
     */
+    test_lieu_module();
+    return 0;
 }
