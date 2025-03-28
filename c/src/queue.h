@@ -1,13 +1,13 @@
 #ifndef _QUEUE
 
 #define _QUEUE
-#include "c/src/rdv.h"
+#include "src/appointment.h"
 
 typedef struct queue
 {
     int dist;
-    Rdv *first;
-    Rdv *last;
+    Appointment *first;
+    Appointment *last;
 } Queue;
 
 #endif
