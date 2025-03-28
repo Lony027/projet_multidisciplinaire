@@ -5,7 +5,7 @@
 
 Lieu create_lieu(char *buffer, int num)
 {
-    Lieu new = malloc(sizeof(Lieu));
+    Lieu new;
     char *separator = ",";
     // create name
 
@@ -40,25 +40,26 @@ Lieu create_lieu(char *buffer, int num)
     return new;
 }
 
-Liste *open_csv_lieu(char *file_name)
+Liste open_csv_lieu(char *file_name)
 {
     FILE *f = fopen(file_name, "r");
     int size = 0;
-    char *buffer[1000];
+    char buffer[1000];
     while (fgets(buffer, 1000, f))
     {
         size++;
     }
-    lseek(f, 0, SEEK_SET);
-    Liste new = malloc(sizeof(liste));
+    fseek(f, 0, SEEK_SET);
+    Liste new;
     new.size = size;
-    new.lst = malloc(sizeof(lieu) * size);
+    new.lst = malloc(sizeof(Lieu) * size);
     for (int i = 0; i < size; i++)
     {
         fgets(buffer, 1000, f);
         new.lst[i] = create_lieu(buffer, i);
     }
     fclose(f);
+    return new;
 }
 
 void free_lieu(Lieu *l)
@@ -67,23 +68,21 @@ void free_lieu(Lieu *l)
     free(l->name);
     free(l->postal);
     free(l->ville);
-    free(l);
-    l = NULL;
 }
 
 void free_liste(Liste *l)
 {
     for (int i = 0; i < l->size; i++)
     {
-        free_lieu(l->lst[i]);
+        free_lieu(&(l->lst[i]));
     }
-    free(l);
-    l = NULL;
+    free(l->lst);
+    l->lst = NULL;
 }
 
 void print_lieu(Lieu l)
 {
-    printf("%d: %s %s %s %s %d %d\n", l.num, l.adresse, l.name, l.postal, l.ville, l.coord.lat, l.coord.longi);
+    printf("%d: %s %s %s %s %f %f\n", l.num, l.adresse, l.name, l.postal, l.ville, l.coord.lat, l.coord.longi);
 }
 
 void print_liste(Liste l)

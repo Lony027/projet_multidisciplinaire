@@ -1,8 +1,17 @@
 #include <stdlib.h>
 
 #include "src/matrice.h"
+#include "src/lieu.h"
 
-int main() {
+int test_lieu_module()
+{
+    Liste new = open_csv_lieu("mock.csv");
+    print_liste(new);
+    free_liste(&new);
+}
+
+int main()
+{
 
     /*
     Matrice m = (Matrice)malloc(sizeof(Matrice));
@@ -14,6 +23,4 @@ int main() {
 
     freeMatrix(m);
     */
-
-
 }

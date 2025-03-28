@@ -19,9 +19,13 @@ typedef struct liste
 } Liste;
 Lieu create_lieu(char *buffer, int num);
 
-Liste *open_csv_lieu(char *file_name);
+Liste open_csv_lieu(char *file_name);
 
 void free_lieu(Lieu *l);
 
 void free_liste(Liste *l);
+
+void print_liste(Liste l);
+
+void print_lieu(Lieu l);
 #endif
