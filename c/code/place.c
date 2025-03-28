@@ -15,8 +15,8 @@ Place create_place(char *buffer, int num)
     // create adress
 
     tmp = strtok(NULL, separator);
-    new.adress = malloc(sizeof(char) * strlen(tmp));
-    strcpy(new.adress, tmp);
+    new.address = malloc(sizeof(char) * strlen(tmp));
+    strcpy(new.address, tmp);
 
     // create postal
     tmp = strtok(NULL, separator);
@@ -30,17 +30,17 @@ Place create_place(char *buffer, int num)
 
     // create lat
     tmp = strtok(NULL, separator);
-    new.coord.lat = atof(tmp);
+    new.coord.latitude = atof(tmp);
 
     // create lat
     tmp = strtok(NULL, separator);
-    new.coord.longi = atof(tmp);
+    new.coord.longitude = atof(tmp);
 
     new.num = num;
     return new;
 }
 
-List open_csv_place(char *file_name)
+List open_place_csv(char *file_name)
 {
     FILE *f = fopen(file_name, "r");
     int size = 0;
@@ -64,7 +64,7 @@ List open_csv_place(char *file_name)
 
 void free_place(Place *l)
 {
-    free(l->adress);
+    free(l->address);
     free(l->name);
     free(l->postal);
     free(l->city);
@@ -82,7 +82,7 @@ void free_list(List *l)
 
 void print_place(Place l)
 {
-    printf("%d: %s %s %s %s %f %f\n", l.num, l.adress, l.name, l.postal, l.city, l.coord.lat, l.coord.longi);
+    printf("%d: %s %s %s %s %f %f\n", l.num, l.address, l.name, l.postal, l.city, l.coord.latitude, l.coord.longitude);
 }
 
 void print_list(List l)

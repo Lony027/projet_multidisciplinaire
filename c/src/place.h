@@ -5,7 +5,7 @@
 typedef struct place
 {
     char *postal;
-    char *adress;
+    char *address;
     char *city;
     Coord coord;
     int num;
@@ -19,7 +19,7 @@ typedef struct list
 } List;
 Place create_place(char *buffer, int num);
 
-List open_csv_place(char *file_name);
+List open_place_csv(char *file_name);
 
 void free_place(Place *l);
 

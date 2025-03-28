@@ -3,10 +3,10 @@
 
 #include "src/place.h"
 
-typedef struct rdv
+typedef struct appointment
 {
-    struct rdv *next;
+    struct appointment *next;
     Place *lieu;
-} Rdv;
+} Appointment;
 
 #endif

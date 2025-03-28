@@ -5,7 +5,7 @@
 
 void test_lieu_module()
 {
-    List new = open_csv_place("mock.csv");
+    List new = open_place_csv("mock.csv");
     print_list(new);
     free_list(&new);
 }

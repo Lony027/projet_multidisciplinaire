@@ -4,8 +4,8 @@
 
 typedef struct coord
 {
-    float lat;
-    float longi;
+    float latitude;
+    float longitude;
 } Coord;
 
 #endif
