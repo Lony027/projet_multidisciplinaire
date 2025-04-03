@@ -1,7 +1,13 @@
-#include <stdlib.h>
-
-#include "src/matrice.h"
+#include "src/matrix.h"
 #include "src/place.h"
+
+void test_matrice_module()
+{  
+    Matrix *m = open_csv_matrix("../mock_distance.csv");
+    print_matrix(m);
+
+    free_matrix(m);
+}
 
 void test_lieu_module()
 {
@@ -12,17 +18,8 @@ void test_lieu_module()
 
 int main()
 {
-
-    /*
-    Matrice m = (Matrice)malloc(sizeof(Matrice));
-    initMatrix(m, 10);
-
-
-    open_csv_matrice("../mock.csv", m);
-    printMatrix(m);
-
-    freeMatrix(m);
-    */
     test_lieu_module();
+    test_matrice_module();
     return 0;
 }
+
