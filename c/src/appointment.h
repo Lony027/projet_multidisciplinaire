@@ -6,6 +6,7 @@
 typedef struct appointment
 {
     struct appointment *next;
+    struct appointment *prev;
     Place place;
 } Appointment;
 
