@@ -60,6 +60,10 @@ int enqueue(Appointment *new, Queue *queue, Matrix *matrix)
 
 Appointment *dequeue(Queue *queue, Matrix *matrix)
 {
+    if (is_empty(queue) || !queue)
+    {
+        return NULL;
+    }
     if (queue->first == queue->last)
     {
         Appointment *tmp = queue->first;
@@ -83,7 +87,7 @@ void free_queue(Queue *queue)
     {
         Appointment *tmp = iterator;
         iterator = iterator->next;
-        free(tmp);
+        free_appointment(tmp);
     }
 
     free(queue);

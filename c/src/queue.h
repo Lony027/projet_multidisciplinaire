@@ -16,7 +16,7 @@ Queue *create_queue();
 int is_empty(Queue *queue);
 void free_queue(Queue *queue);
 Appointment *dequeue(Queue *queue, Matrix *matrix);
-void enqueue(Appointment *new, Queue *queue, Matrix *matrix);
+int enqueue(Appointment *new, Queue *queue, Matrix *matrix);
 void print_queue(Queue *queue);
 
 #endif
