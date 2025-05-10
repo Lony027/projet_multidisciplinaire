@@ -35,8 +35,13 @@ void print_queue(Queue *queue)
     }
 }
 
-void enqueue(Appointment *new, Queue *queue, Matrix *matrix)
+int enqueue(Appointment *new, Queue *queue, Matrix *matrix)
 {
+    if (!new || !queue || !matrix)
+    {
+        return 0;
+    }
+
     if (is_empty(queue))
     {
 
@@ -44,12 +49,13 @@ void enqueue(Appointment *new, Queue *queue, Matrix *matrix)
         queue->last = new;
         queue->dist = 0;
         queue->time = 0;
-        return;
+        return 1;
     }
     queue->last->next = new;
     new->prev = queue->last;
     queue->last = new;
     queue->dist += dist_from_to(new->prev->place.num, new->place.num, matrix);
+    return 1;
 }
 
 Appointment *dequeue(Queue *queue, Matrix *matrix)
