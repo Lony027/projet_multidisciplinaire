@@ -3,6 +3,7 @@
 #include "src/appointment.h"
 #include "src/queue.h"
 #include "src/models.h"
+#include "src/output.h"
 #include <stdio.h>
 void test_matrice_module()
 {
@@ -73,8 +74,37 @@ void test_queue_module()
     free_matrix(m);
 }
 
+void test_output_module()
+{
+    List new = open_place_csv("mock.csv");
+    Matrix *m = open_csv_matrix("../mock_distance.csv");
+    Appointment *a = create_appointment(new.lst[0]);
+    Appointment *b = create_appointment(new.lst[1]);
+    Appointment *c = create_appointment(new.lst[2]);
+    Appointment *d = create_appointment(new.lst[3]);
+    Appointment *e = create_appointment(new.lst[4]);
+    Appointment *f = create_appointment(new.lst[5]);
+    Appointment *g = create_appointment(new.lst[6]);
+    Queue *test = create_queue();
+    Queue *test2 = create_queue();
+    enqueue(a, test, m);
+    enqueue(b, test, m);
+    enqueue(c, test, m);
+    enqueue(d, test, m);
+    enqueue(e, test2, m);
+    enqueue(f, test2, m);
+    enqueue(g, test2, m);
+    Models *tested = init_models(new.size);
+    add_truck(test, tested);
+    add_truck(test2, tested);
+    create_output_csv(tested);
+    free_models(tested);
+    free_list(&new);
+    free_matrix(m);
+}
+
 int main()
 {
-
+    test_output_module();
     return 0;
 }
