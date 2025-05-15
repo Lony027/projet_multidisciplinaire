@@ -4,4 +4,6 @@
 
 #endif
 
-#include "src/modele.h"
+#include "src/models.h"
+
+int create_output_csv(Models* model);

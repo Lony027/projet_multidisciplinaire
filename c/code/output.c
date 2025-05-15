@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int create_output_csv(Modele* model){
-    FILE* output = fopen("hugoStfu.csv", "w+");
+int create_output_csv(Models* model){
+    FILE* output = fopen("output.csv", "w+");
     if (output == NULL)
     {
         perror("Unable to open the file");
@@ -12,7 +12,7 @@ int create_output_csv(Modele* model){
     }
     
     for(int i=0; i < model->size; i++) {
-        Queue* queue = &model->list_truck[i];
+        Queue* queue = model->list_truck[i];
         Appointment *apt = queue->first;
         while (apt != NULL)
         {
