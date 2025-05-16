@@ -3,6 +3,7 @@
 #include "src/appointment.h"
 #include "src/queue.h"
 #include "src/models.h"
+#include "src/genetique.h"
 #include <stdio.h>
 void test_matrice_module()
 {
@@ -76,5 +77,10 @@ void test_queue_module()
 int main()
 {
 
+    List new = open_place_csv("mock.csv");
+    Matrix *m = open_csv_matrix("../mock_distance.csv");
+    Models *first = first_model(new, m);
+    print_list(new);
+    print_models(first);
     return 0;
 }
