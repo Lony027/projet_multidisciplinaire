@@ -93,3 +93,26 @@ void print_list(List l)
         print_place(l.lst[i]);
     }
 }
+
+List* place_sort(Coord* a, List *toSort){
+    List *sorted = malloc(sizeof(List));
+    sorted->size = toSort->size;
+    sorted->lst = malloc(sizeof(Place) * toSort->size);
+    for (int i = 0; i < toSort->size; i++)
+    {
+        sorted->lst[i] = toSort->lst[i];
+    }
+    for (int i = 0; i < sorted->size; i++)
+    {
+        for (int j = 0; j < sorted->size - 1; j++)
+        {
+            if (distance(a, &sorted->lst[j].coord) > distance(a, &sorted->lst[j + 1].coord))
+            {
+                Place tmp = sorted->lst[j];
+                sorted->lst[j] = sorted->lst[j + 1];
+                sorted->lst[j + 1] = tmp;
+            }
+        }
+    }
+    return sorted;
+}
