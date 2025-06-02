@@ -46,21 +46,19 @@ Matrix *open_csv_matrix(char *file_name)
 
     if (fgets(line, sizeof(line), file) != NULL)
     {
-        fgets(line, sizeof(line), file); // Skip header
-
         char *token = strtok(line, ",");
         while (token != NULL)
         {
             size++;
             token = strtok(NULL, ",");
         }
-        size--; // Decrement because of the column skipping
+        
     }
 
     Matrix *matrix = create_matrix(size);
 
     rewind(file);
-    fgets(line, sizeof(line), file); // Skip header
+    
 
     int i = 0;
     while (fgets(line, sizeof(line), file) != NULL && i < size)
@@ -69,10 +67,9 @@ Matrix *open_csv_matrix(char *file_name)
         int j = 0;
         while (token != NULL)
         {
-            if (j > 0)
-            { // Ignore first column
-                matrix->matrix[i][j - 1] = atoi(token);
-            }
+            
+            matrix->matrix[i][j] = atoi(token);
+            
             token = strtok(NULL, ",");
             j++;
         }

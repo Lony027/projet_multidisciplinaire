@@ -78,9 +78,12 @@ int main()
 {
 
     List new = open_place_csv("mock.csv");
-    Matrix *m = open_csv_matrix("../mock_distance.csv");
-    Models *first = first_model(new, m);
-    print_list(new);
-    print_models(first);
+    Matrix *m = open_csv_matrix("../distance_matrix.csv");
+    int *result = genetique(m, new);
+    for (int i = 0; i < new.size - 1; i++)
+    {
+        printf("%d", result[i]);
+    }
+
     return 0;
 }

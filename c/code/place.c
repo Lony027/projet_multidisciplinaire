@@ -93,7 +93,7 @@ void print_list(List l)
         print_place(l.lst[i]);
     }
 }
-
+/*
 List* place_sort(Coord* a, List *toSort){
     List *sorted = malloc(sizeof(List));
     sorted->size = toSort->size;
@@ -116,3 +116,4 @@ List* place_sort(Coord* a, List *toSort){
     }
     return sorted;
 }
+*/
