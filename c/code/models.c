@@ -10,6 +10,7 @@ Models *init_models(int num_max_truck)
         new->dist_tot = 0;
         new->list_truck = malloc(sizeof(Queue *) * num_max_truck);
         new->size = 0;
+        new->time = 0;
     }
     return new;
 }
@@ -54,6 +55,7 @@ int add_truck(Queue *queue, Models *models)
     models->list_truck[models->size] = queue;
     models->size += 1;
     models->dist_tot += queue->dist;
+    models->time += queue->time;
     return 1;
 }
 
@@ -72,6 +74,48 @@ int delete_truck(Models *models, int num_of_truck)
     models->list_truck[models->size - 1] = NULL;
     models->size -= 1;
     models->dist_tot -= delete->dist;
+    models->time -= delete->time;
     free_queue(delete);
     return 1;
+}
+
+Models *list_to_models(Matrix *time, List place, int *parkour, Matrix *dist)
+{
+    Models *model = init_models(place.size);
+    int new_truck = 1;
+    for (int i = 0; i < place.size - 1; i++)
+    {
+        int indice = parkour[i];
+        if (model->size == 0 || new_truck)
+        {
+            Queue *new = create_queue();
+            Appointment *base = create_appointment(place.lst[0]);
+            Appointment *step = create_appointment(place.lst[indice]);
+            Appointment *end = create_appointment(place.lst[0]);
+            enqueue(base, new, dist, time);
+            enqueue(step, new, dist, time);
+            enqueue(end, new, dist, time);
+            add_truck(new, model);
+            new_truck = 0;
+        }
+        else
+        {
+            int current_truck = model->size - 1;
+            Appointment *end = dequeue(model->list_truck[current_truck], dist, time);
+            Appointment *step = create_appointment(place.lst[indice]);
+            enqueue(step, model->list_truck[current_truck], dist, time);
+            enqueue(end, model->list_truck[current_truck], dist, time);
+            if (model->list_truck[current_truck]->time > 3600 * 3)
+            {
+                end = dequeue(model->list_truck[current_truck], dist, time);
+
+                step = dequeue(model->list_truck[current_truck], dist, time);
+                free_appointment(step);
+                enqueue(end, model->list_truck[current_truck], dist, time);
+                i -= 1;
+                new_truck = 1;
+            }
+        }
+    }
+    return model;
 }

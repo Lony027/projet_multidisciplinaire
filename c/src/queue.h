@@ -15,8 +15,9 @@ typedef struct queue
 Queue *create_queue();
 int is_empty(Queue *queue);
 void free_queue(Queue *queue);
-Appointment *dequeue(Queue *queue, Matrix *matrix);
-int enqueue(Appointment *new, Queue *queue, Matrix *matrix);
+Appointment *dequeue(Queue *queue, Matrix *matrix, Matrix *time);
+
+int enqueue(Appointment *new, Queue *queue, Matrix *matrix, Matrix *time);
 void print_queue(Queue *queue);
 
 #endif

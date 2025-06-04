@@ -4,7 +4,7 @@
 #include "src/queue.h"
 #include "src/models.h"
 #include "src/genetique.h"
-#include <stdio.h>
+#include <stdio.h>/*
 void test_matrice_module()
 {
     Matrix *m = open_csv_matrix("../mock_distance.csv");
@@ -73,17 +73,15 @@ void test_queue_module()
     free_list(&new);
     free_matrix(m);
 }
-
+*/
 int main()
 {
 
     List new = open_place_csv("mock.csv");
-    Matrix *m = open_csv_matrix("../distance_matrix.csv");
-    int *result = genetique(m, new);
-    for (int i = 0; i < new.size - 1; i++)
-    {
-        printf("%d", result[i]);
-    }
-
+    Matrix *dist = open_csv_matrix("../distance_matrix.csv");
+    Matrix *time = open_csv_matrix("../duration_matrix.csv");
+    int *result = genetique(dist, new);
+    Models *model = list_to_models(time, new, result, dist);
+    print_models(model);
     return 0;
 }
