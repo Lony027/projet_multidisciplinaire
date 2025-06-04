@@ -3,8 +3,12 @@
 #include "src/appointment.h"
 #include "src/queue.h"
 #include "src/models.h"
-#include "src/genetique.h"
-#include <stdio.h>/*
+#include "src/graph.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <MLV/MLV_window.h>
+
 void test_matrice_module()
 {
     Matrix *m = open_csv_matrix("../mock_distance.csv");
@@ -27,6 +31,7 @@ void test_appointment_module()
     free_appointment(a);
     free_list(&new);
 }
+
 void test_models_module()
 {
     List new = open_place_csv("mock.csv");
@@ -37,10 +42,10 @@ void test_models_module()
     Appointment *d = create_appointment(new.lst[1]);
     Queue *test = create_queue();
     Queue *test2 = create_queue();
-    enqueue(a, test, m);
-    enqueue(b, test, m);
-    enqueue(c, test2, m);
-    enqueue(d, test2, m);
+    enqueue(a, test, m, m);
+    enqueue(b, test, m, m);
+    enqueue(c, test2, m, m);
+    enqueue(d, test2, m, m);
     Models *tested = init_models(new.size);
     add_truck(test, tested);
     print_models(tested);
@@ -52,36 +57,48 @@ void test_models_module()
     free_list(&new);
     free_matrix(m);
 }
+
 void test_queue_module()
 {
-    List new = open_place_csv("mock.csv");
+    List new = open_place_csv("../mock.csv");
     Matrix *m = open_csv_matrix("../mock_distance.csv");
     Appointment *a = create_appointment(new.lst[0]);
     Appointment *b = create_appointment(new.lst[1]);
     Queue *test = create_queue();
     printf("first insertion\n");
-    enqueue(a, test, m);
+    enqueue(a, test, m, m);
     print_queue(test);
     printf("second insertion\n");
-    enqueue(b, test, m);
+    enqueue(b, test, m, m);
     print_queue(test);
     printf("first deleting\n");
-    Appointment *c = dequeue(test, m);
+    Appointment *c = dequeue(test, m, m);
     print_queue(test);
     free_appointment(c);
     free_queue(test);
     free_list(&new);
     free_matrix(m);
 }
-*/
+
+AppState appState;
+
 int main()
 {
+    srand(time(NULL));
 
-    List new = open_place_csv("mock.csv");
+    graph_init();
+    appState = RUNNING;
+
+    List places = open_place_csv("../mock.csv");
     Matrix *dist = open_csv_matrix("../distance_matrix.csv");
     Matrix *time = open_csv_matrix("../duration_matrix.csv");
-    int *result = genetique(dist, new);
-    Models *model = list_to_models(time, new, result, dist);
-    print_models(model);
-    return 0;
+
+    draw_genetic_evolution(places, dist, time);
+
+    free_list(&places);
+    free_matrix(dist);
+    free_matrix(time);
+    graph_free();
+
+    return EXIT_SUCCESS;
 }

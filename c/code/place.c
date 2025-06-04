@@ -10,22 +10,22 @@ Place create_place(char *buffer, int num)
     // create name
 
     char *tmp = strtok(buffer, separator);
-    new.name = malloc(sizeof(char) * strlen(tmp));
+    new.name = malloc(sizeof(char) * strlen(tmp) + 1);
     strcpy(new.name, tmp);
     // create adress
 
     tmp = strtok(NULL, separator);
-    new.address = malloc(sizeof(char) * strlen(tmp));
+    new.address = malloc(sizeof(char) * strlen(tmp) + 1);
     strcpy(new.address, tmp);
 
     // create postal
     tmp = strtok(NULL, separator);
-    new.postal = malloc(sizeof(char) * strlen(tmp));
+    new.postal = malloc(sizeof(char) * strlen(tmp) + 1);
     strcpy(new.postal, tmp);
 
     // create ville
     tmp = strtok(NULL, separator);
-    new.city = malloc(sizeof(char) * strlen(tmp));
+    new.city = malloc(sizeof(char) * strlen(tmp) + 1);
     strcpy(new.city, tmp);
 
     // create lat

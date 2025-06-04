@@ -1,5 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g
+LDFLAGS = -lMLV -lm
 SRC_DIR = src
 CODE_DIR = code
 
@@ -18,14 +19,17 @@ $(MAIN_OBJ): $(MAIN_SRC)
 	$(CC) $(CFLAGS) -I. -c $< -o $@
 
 $(TARGET): $(OBJ_FILES) $(MAIN_OBJ)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 %.o: $(CODE_DIR)/%.c
 	$(CC) $(CFLAGS) -I. -c $< -o $@
 
 clean:
-	$(RM) *.o $(TARGET)
+	$(RM) *.o $(TARGET) output.csv
 
 rebuild: clean all
 
-.PHONY: all clean rebuild
+run: $(TARGET)
+	./$(TARGET)
+
+.PHONY: all clean rebuild run
