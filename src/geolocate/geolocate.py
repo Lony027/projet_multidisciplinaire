@@ -1,13 +1,13 @@
-import pandas as pd
-from dotenv import load_dotenv
-from InquirerPy import inquirer
 import os
-import openrouteservice
+import pandas as pd
 import numpy as np
 from tqdm import trange, tqdm
+from dotenv import load_dotenv
+from InquirerPy import inquirer
+import openrouteservice
 
 def choose_csv():
-    folder = "data"
+    folder = "delivery"
     csv_files = [f for f in os.listdir(folder) if f.endswith(".csv")]
 
     if not csv_files:
@@ -30,28 +30,68 @@ ORS_API_KEY = os.getenv("ORS_API_KEY")
 column_names = ["name", "street", "postalcode", "city"] 
 df = pd.read_csv(order_filename, header=None, names=column_names)
 
-# REVERSE GEOCODE
+# pass as a parameter !!!
+cerp_address = [["Entrepot CERP", "600 Rue des Madeleines", "77100", "Mareuil-lès-Meaux"]]
 
-client = openrouteservice.Client(key=ORS_API_KEY)
+new_row = pd.DataFrame(cerp_address, columns=column_names)
+df = pd.concat([new_row, df], ignore_index=True)
+
+def modify_address(address):
+    if "ZAC vaux, 4 Pl. de l'Île de France" in address:
+        return address.replace("ZAC vaux, 4 Pl. de l'Île de France", "4 Pl. de l'Île de France")
+
+    if "24 Av. de la Font du Berger" in address:
+        return address.replace("24 Av. de la Font du Berger", "24 Av. de la Fontaine du Berger")
+
+    return address
+
 df['full_address'] = df['street'] + ', ' + df['postalcode'].astype(str) + ' ' + df['city'] + ' France'
 
+# REVERSE GEOCODE
+
+# Loading Cache
+cache_file = "src/geolocate/cache/cache_geocoding.csv"
+if os.path.exists(cache_file):
+    cache_df = pd.read_csv(cache_file)
+else:
+    cache_df = pd.DataFrame(columns=["full_address", "latitude", "longitude"])
+
+cache_dict = dict(zip(cache_df['full_address'], zip(cache_df['latitude'], cache_df['longitude'])))
+
+
+client = openrouteservice.Client(key=ORS_API_KEY)
+
 def get_coordinates(address):
+    if address in cache_dict:
+        return cache_dict[address]
+
     try:
-        geocode = client.pelias_search(text=address)
+        geocode = client.pelias_search(text=modify_address(address))
         coords = geocode['features'][0]['geometry']['coordinates']
-        return coords[1], coords[0]  # lat, lon
+        lat, lon = coords[1], coords[0]
+        cache_dict[address] = (lat, lon)
+        return lat, lon
     except Exception as e:
         print(f"Error geocoding {address}: {e}")
         return None, None
 
 
 tqdm.pandas()
-df[['latitude', 'longitude']] = df['full_address'].progress_apply(lambda x: pd.Series(get_coordinates(x)))
+df[['latitude', 'longitude']] = df['full_address'].progress_apply(
+    lambda x: pd.Series(get_coordinates(x))
+)
 df = df.drop(columns=['full_address'])
-geocoded_filename = "output/geocoded_output.csv"
+# all file path should be at the beginning!!
+geocoded_filename = "src/geolocate/output/geocoded_output.csv"
 df.to_csv(geocoded_filename, index=False)
 
 print("Reverse geocoded output saved to 'geocoded_output.csv'")
+
+updated_cache = pd.DataFrame([
+    {'full_address': addr, 'latitude': lat, 'longitude': lon}
+    for addr, (lat, lon) in cache_dict.items() if lat is not None and lon is not None
+])
+updated_cache.to_csv(cache_file, index=False)
 
 # MATRIX GENERATIONS
 
@@ -88,7 +128,7 @@ for i in trange(0, n, batch_size):
         except Exception as e:
             print(f"Unexpected error for block ({i}, {j}): {e}")
 
-pd.DataFrame(distance_matrix).to_csv("output/distance_matrix.csv", index=False, header=False)
-pd.DataFrame(duration_matrix).to_csv("output/duration_matrix.csv", index=False, header=False)
+pd.DataFrame(distance_matrix).to_csv("src/geolocate/output/distance_matrix.csv", index=False, header=False)
+pd.DataFrame(duration_matrix).to_csv("src/geolocate/output/duration_matrix.csv", index=False, header=False)
 
 print("Matrices saved to 'distance_matrix.csv' and 'duration_matrix.csv'")
