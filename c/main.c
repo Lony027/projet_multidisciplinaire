@@ -117,20 +117,21 @@ AppState appState;
 int main(int argc, char *argv[])
 {
     srand(time(NULL));
-    if (argc < 4)
+    int graphic = 0;
+    if (argc == 2)
     {
-        return EXIT_FAILURE;
+        graphic = 1;
     }
     appState = RUNNING;
-    List places = open_place_csv(argv[1]);
-    Matrix *dist = open_csv_matrix(argv[2]);
-    Matrix *time = open_csv_matrix(argv[3]);
+    List places = open_place_csv("src/geolocate/output/geocoded_output.csv");
+    Matrix *dist = open_csv_matrix("src/geolocate/output/distance_matrix.csv");
+    Matrix *time = open_csv_matrix("src/geolocate/output/duration_matrix.csv");
     if (!dist || !time)
     {
         return EXIT_FAILURE;
     }
 
-    genetique(dist, places, time, 1);
+    genetique(dist, places, time, graphic);
 
     Models *best = genetique(dist, places, time, 1);
     create_output_csv(best);
