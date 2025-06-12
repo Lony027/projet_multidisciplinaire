@@ -87,6 +87,7 @@ void test_output_module()
 {
     List new = open_place_csv("mock.csv");
     Matrix *m = open_csv_matrix("../mock_distance.csv");
+    Matrix *time = open_csv_matrix("../duration_matrix.csv");
     Appointment *a = create_appointment(new.lst[0]);
     Appointment *b = create_appointment(new.lst[1]);
     Appointment *c = create_appointment(new.lst[2]);
@@ -96,13 +97,13 @@ void test_output_module()
     Appointment *g = create_appointment(new.lst[6]);
     Queue *test = create_queue();
     Queue *test2 = create_queue();
-    enqueue(a, test, m);
-    enqueue(b, test, m);
-    enqueue(c, test, m);
-    enqueue(d, test, m);
-    enqueue(e, test2, m);
-    enqueue(f, test2, m);
-    enqueue(g, test2, m);
+    enqueue(a, test, m, time);
+    enqueue(b, test, m, time);
+    enqueue(c, test, m, time);
+    enqueue(d, test, m, time);
+    enqueue(e, test2, m, time);
+    enqueue(f, test2, m, time);
+    enqueue(g, test2, m, time);
     Models *tested = init_models(new.size);
     add_truck(test, tested);
     add_truck(test2, tested);
@@ -126,8 +127,8 @@ int main()
 
     genetique(dist, places, time, 1);
 
-    // best = genetique(dist, places, time, 1);
-    // create_output(best);
+    Models *best = genetique(dist, places, time, 1);
+    create_output_csv(best);
 
     free_list(&places);
     free_matrix(dist);
