@@ -34,7 +34,8 @@ FONT_NAME = "DejaVu"
 # --- Load data ---
 PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", "..")) 
 
-routes = pd.read_csv(os.path.join(PROJECT_ROOT, "src.csv", "genetic", "output"), header=None)
+routes = pd.read_csv(os.path.join(PROJECT_ROOT, "src", "genetic", "output.csv"), header=None)
+print(routes)
 locations = pd.read_csv(os.path.join(PROJECT_ROOT, "src", "geolocate", "output", "geocoded_output.csv"))
 time_matrix = pd.read_csv(os.path.join(PROJECT_ROOT, "src", "geolocate", "output", "duration_matrix.csv"), header=None)
 distance_matrix = pd.read_csv(os.path.join(PROJECT_ROOT, "src", "geolocate", "output", "distance_matrix.csv"), header=None)
