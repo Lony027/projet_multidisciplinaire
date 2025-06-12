@@ -228,7 +228,7 @@ Models *genetique(Matrix *distance, List place, Matrix *time, int is_graphic)
 
         if (tmp->dist_tot > best_model->dist_tot)
         {
-            free_models(best_model);
+            // free_models(best_model);
             best_model = tmp;
         }
         if (is_graphic)
