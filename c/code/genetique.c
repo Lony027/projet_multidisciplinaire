@@ -147,6 +147,8 @@ int *genetique(Matrix *distance, List place, Matrix *time, int is_graphic) {
    Models *best_model = NULL;
 
    int start_time = 0;
+   int best_index = 0;
+   double best_fitness = 0;
 
    for (int i = 0; i < POP_INIT; i++) {
        new_pop[i] = malloc(sizeof(int) * (place.size - 1));
@@ -165,8 +167,8 @@ int *genetique(Matrix *distance, List place, Matrix *time, int is_graphic) {
 
        eval_all_fitness(population, distance, place.size - 1, fitness);
 
-       int best_index = 0;
-       double best_fitness = fitness[0];
+       best_index = 0;
+       best_fitness = fitness[0];
        for (int i = 1; i < POP_INIT; i++) {
            if (fitness[i] < best_fitness) {
                best_fitness = fitness[i];
@@ -213,28 +215,19 @@ int *genetique(Matrix *distance, List place, Matrix *time, int is_graphic) {
        }
    }
 
-    if (is_graphic) {
-        if (best_model) {
-            printf("\n=== SOLUTION FINALE ===\n");
-            print_models(best_model);
+   if (is_graphic) {
+       if (best_model) {
+           printf("\n=== SOLUTION FINALE ===\n");
+           print_models(best_model);
 
-            appState = FINISHED;
-            while (appState != EXIT) {
-                if (check_escape_event()) {
-                    appState = EXIT;
-                }
-            }
-        }
-        graph_free();
-    }
-
-   int best_index = 0;
-   double best_fitness = fitness[0];
-   for (int i = 0; i < POP_INIT; i++) {
-       if (fitness[i] < best_fitness) {
-           best_fitness = fitness[i];
-           best_index = i;
+           appState = FINISHED;
+           while (appState != EXIT) {
+               if (check_escape_event()) {
+                   appState = EXIT;
+               }
+           }
        }
+       graph_free();
    }
 
    for (int i = 0; i < place.size - 1; i++) {
