@@ -219,24 +219,26 @@ Models *genetique(Matrix *distance, List place, Matrix *time_m, int is_graphic)
         {
             best_solution[i] = population[best_index][i];
         }
-        if (tmp)
-        {
-            free_models(tmp);
-            tmp = NULL;
-        }
-        tmp = list_to_models(time_m, place, best_solution, distance);
         if (!best_model)
         {
-            best_model = tmp;
+            best_model = list_to_models(time_m, place, best_solution, distance);
         }
-
-        if (tmp->dist_tot < best_model->dist_tot)
+        else
         {
-            // free_models(best_model);
-            printf("%d, %d\n", tmp->dist_tot, best_model->dist_tot);
-            best_model = tmp;
+            tmp = list_to_models(time_m, place, best_solution, distance);
+            if (tmp->dist_tot < best_model->dist_tot)
+            {
+
+                free_models(best_model);
+                printf("%d, %d\n", tmp->dist_tot, best_model->dist_tot);
+                best_model = tmp;
+            }
+            else
+            {
+                free_models(tmp);
+            }
         }
-        if (is_graphic)
+        if (is_graphic && !(gen % 200))
         {
 
             draw(place, best_model->list_truck, best_model->size);
