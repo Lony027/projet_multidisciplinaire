@@ -6,7 +6,7 @@
 #include "src/matrix.h"
 
 #define POP_INIT 200
-#define GENERATION 150
+#define GENERATION 8000
 #define SIZE_TOURNAMENT 4
 #define MUTATION_PROBA 0.1
 

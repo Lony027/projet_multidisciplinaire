@@ -4,7 +4,7 @@
 #include <MLV/MLV_text.h>
 #include <MLV/MLV_time.h>
 #include <MLV/MLV_window.h>
-
+#include <time.h>
 #include "src/graph.h"
 #include "src/models.h"
 
@@ -166,7 +166,7 @@ void eval_all_fitness(int **population, Matrix *distance, int size, double *fitn
     }
 }
 
-Models *genetique(Matrix *distance, List place, Matrix *time, int is_graphic)
+Models *genetique(Matrix *distance, List place, Matrix *time_m, int is_graphic)
 {
     int **population = first_models(place);
     int **new_pop = malloc(sizeof(int *) * POP_INIT);
@@ -190,8 +190,10 @@ Models *genetique(Matrix *distance, List place, Matrix *time, int is_graphic)
         appState = RUNNING;
         start_time = MLV_get_time();
     }
-
-    for (int gen = 0; gen < GENERATION && (!is_graphic || appState != EXIT); gen++)
+    time_t start;
+    start = time(NULL);
+    time_t end;
+    for (int gen = 0; (!is_graphic || appState != EXIT); gen++)
     {
         if (!is_graphic)
         {
@@ -220,7 +222,7 @@ Models *genetique(Matrix *distance, List place, Matrix *time, int is_graphic)
             free_models(tmp);
             tmp = NULL;
         }
-        tmp = list_to_models(time, place, best_solution, distance);
+        tmp = list_to_models(time_m, place, best_solution, distance);
         if (!best_model)
         {
             best_model = tmp;
@@ -267,6 +269,13 @@ Models *genetique(Matrix *distance, List place, Matrix *time, int is_graphic)
         if (is_graphic && check_escape_event())
         {
             appState = EXIT;
+        }
+
+        end = time(NULL);
+        unsigned long secondes = (unsigned long)difftime(end, start);
+        if (secondes > 55)
+        {
+            break;
         }
     }
 
