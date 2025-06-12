@@ -28,4 +28,6 @@ void free_list(List *l);
 void print_list(List l);
 
 void print_place(Place l);
+
+List* place_sort(Coord *a, List *toSort);
 #endif

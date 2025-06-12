@@ -10,22 +10,22 @@ Place create_place(char *buffer, int num)
     // create name
 
     char *tmp = strtok(buffer, separator);
-    new.name = malloc(sizeof(char) * strlen(tmp));
+    new.name = malloc(sizeof(char) * strlen(tmp) + 1);
     strcpy(new.name, tmp);
     // create adress
 
     tmp = strtok(NULL, separator);
-    new.address = malloc(sizeof(char) * strlen(tmp));
+    new.address = malloc(sizeof(char) * strlen(tmp) + 1);
     strcpy(new.address, tmp);
 
     // create postal
     tmp = strtok(NULL, separator);
-    new.postal = malloc(sizeof(char) * strlen(tmp));
+    new.postal = malloc(sizeof(char) * strlen(tmp) + 1);
     strcpy(new.postal, tmp);
 
     // create ville
     tmp = strtok(NULL, separator);
-    new.city = malloc(sizeof(char) * strlen(tmp));
+    new.city = malloc(sizeof(char) * strlen(tmp) + 1);
     strcpy(new.city, tmp);
 
     // create lat
@@ -93,3 +93,27 @@ void print_list(List l)
         print_place(l.lst[i]);
     }
 }
+/*
+List* place_sort(Coord* a, List *toSort){
+    List *sorted = malloc(sizeof(List));
+    sorted->size = toSort->size;
+    sorted->lst = malloc(sizeof(Place) * toSort->size);
+    for (int i = 0; i < toSort->size; i++)
+    {
+        sorted->lst[i] = toSort->lst[i];
+    }
+    for (int i = 0; i < sorted->size; i++)
+    {
+        for (int j = 0; j < sorted->size - 1; j++)
+        {
+            if (distance(a, &sorted->lst[j].coord) > distance(a, &sorted->lst[j + 1].coord))
+            {
+                Place tmp = sorted->lst[j];
+                sorted->lst[j] = sorted->lst[j + 1];
+                sorted->lst[j + 1] = tmp;
+            }
+        }
+    }
+    return sorted;
+}
+*/

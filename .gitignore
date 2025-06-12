@@ -1,3 +1,5 @@
 .vscode
 .history
 c/main
+c/.gdb_history
+c/peda-session-main.txt

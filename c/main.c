@@ -3,8 +3,14 @@
 #include "src/appointment.h"
 #include "src/queue.h"
 #include "src/models.h"
+#include "src/graph.h"
 #include "src/output.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <MLV/MLV_window.h>
+#include "src/genetique.h"
+
 void test_matrice_module()
 {
     Matrix *m = open_csv_matrix("../mock_distance.csv");
@@ -27,6 +33,7 @@ void test_appointment_module()
     free_appointment(a);
     free_list(&new);
 }
+
 void test_models_module()
 {
     List new = open_place_csv("mock.csv");
@@ -37,10 +44,10 @@ void test_models_module()
     Appointment *d = create_appointment(new.lst[1]);
     Queue *test = create_queue();
     Queue *test2 = create_queue();
-    enqueue(a, test, m);
-    enqueue(b, test, m);
-    enqueue(c, test2, m);
-    enqueue(d, test2, m);
+    enqueue(a, test, m, m);
+    enqueue(b, test, m, m);
+    enqueue(c, test2, m, m);
+    enqueue(d, test2, m, m);
     Models *tested = init_models(new.size);
     add_truck(test, tested);
     print_models(tested);
@@ -52,21 +59,22 @@ void test_models_module()
     free_list(&new);
     free_matrix(m);
 }
+
 void test_queue_module()
 {
-    List new = open_place_csv("mock.csv");
+    List new = open_place_csv("../mock.csv");
     Matrix *m = open_csv_matrix("../mock_distance.csv");
     Appointment *a = create_appointment(new.lst[0]);
     Appointment *b = create_appointment(new.lst[1]);
     Queue *test = create_queue();
     printf("first insertion\n");
-    enqueue(a, test, m);
+    enqueue(a, test, m, m);
     print_queue(test);
     printf("second insertion\n");
-    enqueue(b, test, m);
+    enqueue(b, test, m, m);
     print_queue(test);
     printf("first deleting\n");
-    Appointment *c = dequeue(test, m);
+    Appointment *c = dequeue(test, m, m);
     print_queue(test);
     free_appointment(c);
     free_queue(test);
@@ -74,10 +82,12 @@ void test_queue_module()
     free_matrix(m);
 }
 
+
 void test_output_module()
 {
     List new = open_place_csv("mock.csv");
     Matrix *m = open_csv_matrix("../mock_distance.csv");
+    Matrix *time = open_csv_matrix("../duration_matrix.csv");
     Appointment *a = create_appointment(new.lst[0]);
     Appointment *b = create_appointment(new.lst[1]);
     Appointment *c = create_appointment(new.lst[2]);
@@ -87,13 +97,13 @@ void test_output_module()
     Appointment *g = create_appointment(new.lst[6]);
     Queue *test = create_queue();
     Queue *test2 = create_queue();
-    enqueue(a, test, m);
-    enqueue(b, test, m);
-    enqueue(c, test, m);
-    enqueue(d, test, m);
-    enqueue(e, test2, m);
-    enqueue(f, test2, m);
-    enqueue(g, test2, m);
+    enqueue(a, test, m, time);
+    enqueue(b, test, m, time);
+    enqueue(c, test, m, time);
+    enqueue(d, test, m, time);
+    enqueue(e, test2, m, time);
+    enqueue(f, test2, m, time);
+    enqueue(g, test2, m, time);
     Models *tested = init_models(new.size);
     add_truck(test, tested);
     add_truck(test2, tested);
@@ -103,8 +113,26 @@ void test_output_module()
     free_matrix(m);
 }
 
+AppState appState;
+
 int main()
 {
-    test_output_module();
-    return 0;
+    srand(time(NULL));
+
+    appState = RUNNING;
+
+    List places = open_place_csv("../mock.csv");
+    Matrix *dist = open_csv_matrix("../distance_matrix.csv");
+    Matrix *time = open_csv_matrix("../duration_matrix.csv");
+
+    genetique(dist, places, time, 1);
+
+    Models *best = genetique(dist, places, time, 1);
+    create_output_csv(best);
+
+    free_list(&places);
+    free_matrix(dist);
+    free_matrix(time);
+
+    return EXIT_SUCCESS;
 }
