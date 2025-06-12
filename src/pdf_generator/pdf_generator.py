@@ -25,16 +25,19 @@ FUEL_PRICE_EUR_PER_L = 1.72
 MAX_MAP_WIDTH_MM = 120
 PDF_WIDTH_MM = 210  # A4 size in mm
 
-FONT_PATH = "src/pdf_generator/fonts/DejaVuSans.ttf"
-FONT_BOLD_PATH = "src/pdf_generator/fonts/DejaVuSans-Bold.ttf"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+FONT_PATH = os.path.join(BASE_DIR, "fonts", "DejaVuSans.ttf")
+FONT_BOLD_PATH = os.path.join(BASE_DIR, "fonts", "DejaVuSans-Bold.ttf")
 FONT_NAME = "DejaVu"
 
 # --- Load data ---
-# SHOULD BE PASSED AS PARAMETERS !!!!!!!!
-routes = pd.read_csv("fake_c_output.csv", header=None)
-locations = pd.read_csv("src/geolocate/output/geocoded_output.csv")
-time_matrix = pd.read_csv("src/geolocate/output/duration_matrix.csv", header=None)
-distance_matrix = pd.read_csv("src/geolocate/output/distance_matrix.csv", header=None)
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", "..")) 
+
+routes = pd.read_csv(os.path.join(PROJECT_ROOT, "fake_c_output.csv"), header=None)
+locations = pd.read_csv(os.path.join(PROJECT_ROOT, "src", "geolocate", "output", "geocoded_output.csv"))
+time_matrix = pd.read_csv(os.path.join(PROJECT_ROOT, "src", "geolocate", "output", "duration_matrix.csv"), header=None)
+distance_matrix = pd.read_csv(os.path.join(PROJECT_ROOT, "src", "geolocate", "output", "distance_matrix.csv"), header=None)
 
 # --- Helper ---
 def format_time(t: datetime) -> str:
