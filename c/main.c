@@ -95,6 +95,9 @@ int main()
 
     genetique(dist, places, time, 1);
 
+    // best = genetique(dist, places, time, 1);
+    // create_output(best);
+
     free_list(&places);
     free_matrix(dist);
     free_matrix(time);

@@ -137,13 +137,12 @@ void eval_all_fitness(int **population, Matrix *distance, int size, double *fitn
     }
 }
 
-int *genetique(Matrix *distance, List place, Matrix *time, int is_graphic) {
+Models *genetique(Matrix *distance, List place, Matrix *time, int is_graphic) {
    int **population = first_models(place);
    int **new_pop = malloc(sizeof(int *) * POP_INIT);
    double *fitness = malloc(sizeof(double) * POP_INIT);
 
    int *best_solution = malloc(sizeof(int) * (place.size - 1));
-   int *result = malloc(sizeof(int) * (place.size - 1));
    Models *best_model = NULL;
 
    int start_time = 0;
@@ -230,10 +229,6 @@ int *genetique(Matrix *distance, List place, Matrix *time, int is_graphic) {
        graph_free();
    }
 
-   for (int i = 0; i < place.size - 1; i++) {
-       result[i] = population[best_index][i];
-   }
-
    for (int i = 0; i < POP_INIT; i++) {
        free(population[i]);
        free(new_pop[i]);
@@ -242,9 +237,6 @@ int *genetique(Matrix *distance, List place, Matrix *time, int is_graphic) {
    free(new_pop);
    free(fitness);
    free(best_solution);
-   if (best_model) {
-       free_models(best_model);
-   }
 
-   return result;
+   return best_model;
 }
