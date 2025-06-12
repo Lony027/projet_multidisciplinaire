@@ -42,7 +42,12 @@ Place create_place(char *buffer, int num)
 
 List open_place_csv(char *file_name)
 {
+
     FILE *f = fopen(file_name, "r");
+    if (!f)
+    {
+        exit(1);
+    }
     int size = 0;
     char buffer[1000];
     while (fgets(buffer, 1000, f))

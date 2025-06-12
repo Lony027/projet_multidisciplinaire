@@ -51,7 +51,7 @@ int *selection_tournoi(int **population, double *fitness, int tournament_size)
     for (int i = 1; i < tournament_size; i++)
     {
         int challenger = rand() % POP_INIT;
-        if (fitness[challenger] > fitness[meilleur_index])
+        if (fitness[challenger] < fitness[meilleur_index])
         {
             meilleur_index = challenger;
         }
@@ -231,6 +231,7 @@ Models *genetique(Matrix *distance, List place, Matrix *time_m, int is_graphic)
         if (tmp->dist_tot < best_model->dist_tot)
         {
             // free_models(best_model);
+            printf("%d, %d\n", tmp->dist_tot, best_model->dist_tot);
             best_model = tmp;
         }
         if (is_graphic)

@@ -82,7 +82,6 @@ void test_queue_module()
     free_matrix(m);
 }
 
-
 void test_output_module()
 {
     List new = open_place_csv("mock.csv");
@@ -115,15 +114,21 @@ void test_output_module()
 
 AppState appState;
 
-int main()
+int main(int argc, char *argv[])
 {
     srand(time(NULL));
-
+    if (argc < 4)
+    {
+        return EXIT_FAILURE;
+    }
     appState = RUNNING;
-
-    List places = open_place_csv("../mock.csv");
-    Matrix *dist = open_csv_matrix("../distance_matrix.csv");
-    Matrix *time = open_csv_matrix("../duration_matrix.csv");
+    List places = open_place_csv(argv[1]);
+    Matrix *dist = open_csv_matrix(argv[2]);
+    Matrix *time = open_csv_matrix(argv[3]);
+    if (!dist || !time)
+    {
+        return EXIT_FAILURE;
+    }
 
     genetique(dist, places, time, 1);
 
