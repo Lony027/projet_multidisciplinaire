@@ -3,16 +3,13 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 from shapely.geometry import LineString, Point
 import geopandas as gpd
 import contextily as ctx
 from PIL import Image
 from fpdf import FPDF
 from fpdf.enums import XPos, YPos
-
-
-
-
 
 # --- Constants ---
 START_TIME = datetime.strptime("09:00", "%H:%M")
@@ -31,14 +28,24 @@ FONT_PATH = os.path.join(BASE_DIR, "fonts", "DejaVuSans.ttf")
 FONT_BOLD_PATH = os.path.join(BASE_DIR, "fonts", "DejaVuSans-Bold.ttf")
 FONT_NAME = "DejaVu"
 
+
+
+COLORS = [
+    "#e6194b", "#3cb44b", "#ffe119", "#4363d8", "#f58231", "#911eb4",
+    "#46f0f0", "#f032e6", "#bcf60c", "#fabebe", "#008080", "#e6beff",
+    "#9a6324", "#fffac8", "#800000", "#aaffc3", "#808000", "#ffd8b1"
+]
+
 # --- Load data ---
 PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", "..")) 
 
-routes = pd.read_csv(os.path.join(PROJECT_ROOT, "src", "genetic", "output.csv"), header=None)
-print(routes)
+routes = pd.read_csv(os.path.join(PROJECT_ROOT, "fake_c_output.csv"), header=None)
 locations = pd.read_csv(os.path.join(PROJECT_ROOT, "src", "geolocate", "output", "geocoded_output.csv"))
 time_matrix = pd.read_csv(os.path.join(PROJECT_ROOT, "src", "geolocate", "output", "duration_matrix.csv"), header=None)
 distance_matrix = pd.read_csv(os.path.join(PROJECT_ROOT, "src", "geolocate", "output", "distance_matrix.csv"), header=None)
+
+global_routes = []  # Pour les lignes
+global_summary = []  # Pour les stats
 
 # --- Helper ---
 def format_time(t: datetime) -> str:
@@ -156,18 +163,142 @@ for i, route in routes.iterrows():
             current_time = departure_time
             prev_index = idx
 
+
+
     # Summary
-    pdf.ln(5)
-    pdf.set_font(FONT_NAME, 'B', 10)
+    # pdf.ln(5)
+    # pdf.set_font(FONT_NAME, 'B', 10)
     total_km = total_distance_m / 1000
     fuel_l = (total_km * FUEL_CONSUMPTION_L_PER_100KM) / 100
     fuel_cost = fuel_l * FUEL_PRICE_EUR_PER_L
 
-    pdf.cell(0, 10, f"Distance totale parcourue : {total_km:.1f} km", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-    pdf.cell(0, 10, f"Carburant estimé : {fuel_l:.2f} L (8.5 L / 100km)", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-    pdf.cell(0, 10, f"Coût carburant estimé : {fuel_cost:.2f} € (1.72 €/L)", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    color = COLORS[i % len(COLORS)]
+
+    line_gdf = gpd.GeoDataFrame(geometry=[LineString(gdf.geometry)], crs=gdf.crs)
+    global_routes.append({
+        "geometry": line_gdf.geometry.iloc[0],
+        "color": color,
+        "label": f"Camionnette {i+1}"
+    })
+
+
+    global_summary.append({
+        "camionnette": f"Camionnette {i+1}",
+        "distance_km": total_km,
+        "fuel_l": fuel_l,
+        "fuel_cost": fuel_cost,
+    })
+
+    # pdf.cell(0, 10, f"Distance totale parcourue : {total_km:.1f} km", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    # pdf.cell(0, 10, f"Carburant estimé : {fuel_l:.2f} L (8.5 L / 100km)", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    # pdf.cell(0, 10, f"Coût carburant estimé : {fuel_cost:.2f} € (1.72 €/L)", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
 
     # Save PDF
     pdf.output(f"parcours_camionnette_{i+1}.pdf")
+
+
+# Générer la carte globale
+fig, ax = plt.subplots(figsize=(10, 10))
+
+legend_elements = []
+
+# Ajouter les points de passage
+all_points = []
+for route in routes.itertuples(index=False):
+    indices = pd.Series(route).dropna().astype(int).tolist()
+    for idx in indices:
+        point = Point(locations.iloc[idx]['longitude'], locations.iloc[idx]['latitude'])
+        all_points.append(point)
+
+
+points_gdf = gpd.GeoDataFrame(geometry=all_points, crs="EPSG:4326").to_crs(epsg=3857)
+
+for route in global_routes:
+    gpd.GeoSeries([route["geometry"]], crs="EPSG:3857").plot(
+        ax=ax,
+        linewidth=2.5,
+        color=route["color"],
+        label=route["label"]
+    )
+    legend_elements.append(Line2D([0], [0], color=route["color"], lw=3, label=route["label"]))
+
+# Ajouter les points
+points_gdf.plot(ax=ax, marker='o', color='black', markersize=20)
+
+ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
+ax.axis("off")
+ax.legend(handles=legend_elements, loc='upper left', fontsize='small')
+
+# # Générer la carte globale
+# all_lines = gpd.GeoDataFrame(geometry=global_routes, crs="EPSG:3857")
+# fig, ax = plt.subplots(figsize=(10, 10))
+# all_lines.plot(ax=ax, linewidth=2.5, alpha=0.7)
+
+
+
+# points_gdf = gpd.GeoDataFrame(geometry=all_points, crs="EPSG:4326").to_crs(epsg=3857)
+# points_gdf.plot(ax=ax, marker='o', color='red', markersize=25)
+
+# ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
+# ax.axis('off')
+
+
+global_map_path = "carte_globale.png"
+plt.savefig(global_map_path, bbox_inches="tight", dpi=150)
+plt.close()
+
+# Créer le PDF global
+pdf_global = FPDF()
+pdf_global.set_auto_page_break(auto=True, margin=15)
+pdf_global.add_page()
+pdf_global.add_font(FONT_NAME, "", FONT_PATH)
+pdf_global.add_font(FONT_NAME, "B", FONT_BOLD_PATH)
+pdf_global.set_font(FONT_NAME, 'B', 14)
+pdf_global.cell(0, 10, "Carte globale des parcours", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+
+# Ajouter la carte
+with Image.open(global_map_path) as img:
+    width_px, height_px = img.size
+    dpi = img.info.get('dpi', (96,))[0]
+    width_mm = width_px / dpi * 25.4
+    height_mm = height_px / dpi * 25.4
+
+if width_mm > MAX_MAP_WIDTH_MM:
+    scale = MAX_MAP_WIDTH_MM / width_mm
+    width_mm *= scale
+    height_mm *= scale
+
+x_offset = (PDF_WIDTH_MM - width_mm) / 2
+pdf_global.image(global_map_path, x=x_offset, w=width_mm, h=height_mm)
+os.remove(global_map_path)
+
+# Résumé des camionnettes
+pdf_global.ln(5)
+pdf_global.set_font(FONT_NAME, 'B', 12)
+pdf_global.cell(0, 10, "Résumé carburant et distances par camionnette", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+
+pdf_global.set_font(FONT_NAME, '', 10)
+
+total_distance = 0
+total_fuel = 0
+total_cost = 0
+
+for item in global_summary:
+    pdf_global.cell(0, 8, f"{item['camionnette']} - {item['distance_km']:.1f} km, "
+                          f"{item['fuel_l']:.2f} L, {item['fuel_cost']:.2f} €", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    total_distance += item["distance_km"]
+    total_fuel += item["fuel_l"]
+    total_cost += item["fuel_cost"]
+
+# Résumé global total
+pdf_global.ln(5)
+pdf_global.set_font(FONT_NAME, 'B', 10)
+pdf_global.cell(0, 10, f"Distance totale parcourue : {total_distance:.1f} km", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+pdf_global.cell(0, 10, f"Carburant estimé : {total_fuel:.2f} L (8.5 L / 100km)", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+pdf_global.cell(0, 10, f"Coût carburant estimé : {total_cost:.2f} € (1.72 €/L)", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+
+# Sauver le PDF global
+pdf_global.output("parcours_global.pdf")
+
 
 print("PDFs générés pour chaque camionnette.")
