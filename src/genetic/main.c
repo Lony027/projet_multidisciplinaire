@@ -116,7 +116,7 @@ AppState appState;
 
 int main(int argc, char *argv[])
 {
-    printf("bonjoir\n");
+    
     srand(time(NULL));
     int graphic = 0;
     if (argc == 2)
@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
     }
     appState = RUNNING;
     List places = open_place_csv("src/geolocate/output/geocoded_output.csv");
-    printf(" la %d\n", places.size);
+    
     Matrix *dist = open_csv_matrix("src/geolocate/output/distance_matrix.csv");
     Matrix *timed = open_csv_matrix("src/geolocate/output/duration_matrix.csv");
     print_matrix(timed);

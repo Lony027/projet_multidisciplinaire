@@ -226,7 +226,6 @@ Models *genetique(Matrix *distance, List place, Matrix *time_m, int is_graphic, 
             {
 
                 free_models(best_model);
-                printf("%d, %d, gen: %d \n", tmp->dist_tot, best_model->dist_tot, gen);
                 best_model = tmp;
             }
             else
