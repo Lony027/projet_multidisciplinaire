@@ -127,8 +127,9 @@ int main(int argc, char *argv[])
     List places = open_place_csv("src/geolocate/output/geocoded_output.csv");
     printf(" la %d\n", places.size);
     Matrix *dist = open_csv_matrix("src/geolocate/output/distance_matrix.csv");
-    Matrix *time = open_csv_matrix("src/geolocate/output/duration_matrix.csv");
-    if (!dist || !time)
+    Matrix *timed = open_csv_matrix("src/geolocate/output/duration_matrix.csv");
+    print_matrix(timed);
+    if (!dist || !timed)
     {
         return EXIT_FAILURE;
     }
@@ -136,10 +137,10 @@ int main(int argc, char *argv[])
     {
         graph_init();
     }
-    Models *best = genetique(dist, places, time, graphic, 5);
+    Models *best = genetique(dist, places, timed, graphic, 5);
     for (int i = 0; i < 10; i++)
     {
-        Models *tmp = genetique(dist, places, time, graphic, 5);
+        Models *tmp = genetique(dist, places, timed, graphic, 5);
         if (tmp->dist_tot < best->dist_tot)
         {
             free_models(best);
@@ -172,10 +173,10 @@ int main(int argc, char *argv[])
         }
         graph_free();
     }
-
+    free_models(best);
     free_list(&places);
     free_matrix(dist);
-    free_matrix(time);
+    free_matrix(timed);
 
     return EXIT_SUCCESS;
 }

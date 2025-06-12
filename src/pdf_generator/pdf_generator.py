@@ -39,7 +39,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 
 #LOAD DATA
 
-with open(os.path.join(PROJECT_ROOT, "src", "genetic", "output.csv")) as f:
+with open(os.path.join(PROJECT_ROOT, "src", "genetic", "output")) as f:
     routes = [line.strip().split(",") for line in f if line.strip()]
 
 locations = pd.read_csv(os.path.join(PROJECT_ROOT, "src", "geolocate", "output", "geocoded_output.csv"))
