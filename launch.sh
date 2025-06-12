@@ -84,12 +84,18 @@ install_deps() {
     done
 }
 
-# check_python
-# check_venv
-# create_venv
+check_python
+check_venv
+create_venv
 activate_venv
-# install_deps
-# python3 src/geolocate/geolocate.py
-# make -C src/genetic
-# ./src/genetic/main ; [ $? -eq 1 ] && echo "slt";
+install_deps
+python3 src/geolocate/geolocate.py
+make -C src/genetic
+
+if [ "$1" == "-G" ]; then
+    ./src/genetic/main -G; [ $? -eq 1 ] && echo "error";
+else
+    ./src/genetic/main; [ $? -eq 1 ] && echo "error";
+fi
+
 python3 src/pdf_generator/pdf_generator.py
