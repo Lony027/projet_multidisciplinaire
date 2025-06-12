@@ -20,11 +20,11 @@ typedef enum {
 extern AppState appState;
 
 void graph_init();
+int check_escape_event();
 void draw_truck_path(Queue *queue, List places, MLV_Color color);
 void draw(List places, Queue **queues, int num_queues);
-void draw_timer();
+void draw_timer(int initial_time);
 void draw_generation_info(int generation, double best_fitness, int num_trucks);
-void draw_genetic_evolution(List places, Matrix *dist, Matrix *time);
 Queue* create_random_truck_path(List places, Matrix *matrix, int start_place_idx);
 void graph_free();
 

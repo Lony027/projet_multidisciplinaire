@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <MLV/MLV_window.h>
+#include "src/genetique.h"
 
 void test_matrice_module()
 {
@@ -86,19 +87,17 @@ int main()
 {
     srand(time(NULL));
 
-    graph_init();
     appState = RUNNING;
 
     List places = open_place_csv("../mock.csv");
     Matrix *dist = open_csv_matrix("../distance_matrix.csv");
     Matrix *time = open_csv_matrix("../duration_matrix.csv");
 
-    draw_genetic_evolution(places, dist, time);
+    genetique(dist, places, time, 1);
 
     free_list(&places);
     free_matrix(dist);
     free_matrix(time);
-    graph_free();
 
     return EXIT_SUCCESS;
 }

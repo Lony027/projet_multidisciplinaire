@@ -1,6 +1,12 @@
 #include "src/genetique.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <MLV/MLV_text.h>
+#include <MLV/MLV_time.h>
+#include <MLV/MLV_window.h>
+
+#include "src/graph.h"
+#include "src/models.h"
 
 void shuffle(int *array, int n) {
     for (int i = n - 1; i > 0; i--) {
@@ -131,45 +137,121 @@ void eval_all_fitness(int **population, Matrix *distance, int size, double *fitn
     }
 }
 
-int *genetique(Matrix *distance, List place) {
-    int **population = first_models(place);
-    int **new_pop = malloc(sizeof(int *) * POP_INIT);
-    double *fitness = malloc(sizeof(double) * POP_INIT);
+int *genetique(Matrix *distance, List place, Matrix *time, int is_graphic) {
+   int **population = first_models(place);
+   int **new_pop = malloc(sizeof(int *) * POP_INIT);
+   double *fitness = malloc(sizeof(double) * POP_INIT);
 
-    for (int i = 0; i < POP_INIT; i++) {
-        new_pop[i] = malloc(sizeof(int) * (place.size - 1));
-    }
+   int *best_solution = malloc(sizeof(int) * (place.size - 1));
+   int *result = malloc(sizeof(int) * (place.size - 1));
+   Models *best_model = NULL;
 
-    for (int gen = 0; gen < GENERATION; gen++) {
-        printf("gen: %d\n", gen);
-        eval_all_fitness(population, distance, place.size - 1, fitness);
+   int start_time = 0;
 
-        for (int i = 0; i < POP_INIT; i += 2) {
-            int *parent1 = selection_tournoi(population, fitness, SIZE_TOURNAMENT);
-            int *parent2 = selection_tournoi(population, fitness, SIZE_TOURNAMENT);
-            crossover_pmx(parent1, parent2, new_pop[i], new_pop[i + 1], place.size - 1);
+   for (int i = 0; i < POP_INIT; i++) {
+       new_pop[i] = malloc(sizeof(int) * (place.size - 1));
+   }
 
-            if ((double)rand() / RAND_MAX < MUTATION_PROBA)
-                mutation_swap(new_pop[i], place.size - 1);
+   if (is_graphic) {
+       graph_init();
+       appState = RUNNING;
+       start_time = MLV_get_time();
+   }
 
-            for (int k = 0; k < POP_INIT; k++)
-            {
-                for (int j = 0; j < place.size - 1; j++)
-                {
-                    population[i][j] = new_pop[i][j];
+   for (int gen = 0; gen < GENERATION && (!is_graphic || appState != EXIT); gen++) {
+       if (!is_graphic) {
+           printf("gen: %d\n", gen);
+       }
+
+       eval_all_fitness(population, distance, place.size - 1, fitness);
+
+       int best_index = 0;
+       double best_fitness = fitness[0];
+       for (int i = 1; i < POP_INIT; i++) {
+           if (fitness[i] < best_fitness) {
+               best_fitness = fitness[i];
+               best_index = i;
+           }
+       }
+
+       for (int i = 0; i < place.size - 1; i++) {
+           best_solution[i] = population[best_index][i];
+       }
+
+       if (is_graphic) {
+           if (best_model) {
+               free_models(best_model);
+           }
+           best_model = list_to_models(time, place, best_solution, distance);
+           draw(place, best_model->list_truck, best_model->size);
+           draw_generation_info(gen, best_model->dist_tot, best_model->size);
+           draw_timer(start_time);
+           MLV_actualise_window();
+       }
+
+       for (int i = 0; i < POP_INIT; i += 2) {
+           int *parent1 = selection_tournoi(population, fitness, SIZE_TOURNAMENT);
+           int *parent2 = selection_tournoi(population, fitness, SIZE_TOURNAMENT);
+           crossover_pmx(parent1, parent2, new_pop[i], new_pop[i + 1], place.size - 1);
+
+           if ((double)rand() / RAND_MAX < MUTATION_PROBA) {
+               mutation_swap(new_pop[i], place.size - 1);
+           }
+           if ((double)rand() / RAND_MAX < MUTATION_PROBA) {
+               mutation_inversion(new_pop[i + 1], place.size - 1);
+           }
+       }
+
+       for (int i = 0; i < POP_INIT; i++) {
+           for (int j = 0; j < place.size - 1; j++) {
+               population[i][j] = new_pop[i][j];
+           }
+       }
+
+       if (is_graphic && check_escape_event()) {
+           appState = EXIT;
+       }
+   }
+
+    if (is_graphic) {
+        if (best_model) {
+            printf("\n=== SOLUTION FINALE ===\n");
+            print_models(best_model);
+
+            appState = FINISHED;
+            while (appState != EXIT) {
+                if (check_escape_event()) {
+                    appState = EXIT;
                 }
             }
         }
+        graph_free();
     }
-    double best_fitness = 0;
-    int best_index = 0;
-    for (int i = 0; i < POP_INIT; i++)
-    {
-        if (fitness[i] > best_fitness)
-        {
-            best_fitness = fitness[i];
-            best_index = i;
-        }
-    }
-    return population[best_index];
+
+   int best_index = 0;
+   double best_fitness = fitness[0];
+   for (int i = 0; i < POP_INIT; i++) {
+       if (fitness[i] < best_fitness) {
+           best_fitness = fitness[i];
+           best_index = i;
+       }
+   }
+
+   for (int i = 0; i < place.size - 1; i++) {
+       result[i] = population[best_index][i];
+   }
+
+   for (int i = 0; i < POP_INIT; i++) {
+       free(population[i]);
+       free(new_pop[i]);
+   }
+   free(population);
+   free(new_pop);
+   free(fitness);
+   free(best_solution);
+   if (best_model) {
+       free_models(best_model);
+   }
+
+   return result;
 }

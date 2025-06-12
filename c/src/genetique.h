@@ -9,7 +9,7 @@
 #define SIZE_TOURNAMENT 4
 #define MUTATION_PROBA 0.1
 
-int *genetique(Matrix *distance, List place);
+int *genetique(Matrix *distance, List place, Matrix *time, int is_graphic);
 int **first_models(List place);
 double eval_fitness(int *individue, Matrix *distance, int size);
 void eval_all_fitness(int **population, Matrix *distance, int size, double *fitness);

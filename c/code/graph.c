@@ -117,9 +117,9 @@ void draw(List places, Queue **queues, int num_queues) {
     MLV_actualise_window();
 }
 
-void draw_timer() {
+void draw_timer(int initial_time) {
     int current_time = MLV_get_time();
-    int elapsed_time = (current_time - 0) / 1000;
+    int elapsed_time = (current_time - initial_time) / 1000;
 
     int minutes = elapsed_time / 60;
     int seconds = elapsed_time % 60;
@@ -141,6 +141,20 @@ void draw_generation_info(int generation, double best_fitness, int num_trucks) {
 
     MLV_draw_filled_rectangle(10, 10, 400, 30, MLV_COLOR_BLACK);
     MLV_draw_text(10, 15, info_text, MLV_COLOR_WHITE);
+}
+
+int check_escape_event() {
+    MLV_Event event;
+    MLV_Keyboard_button key;
+    int mouse_x, mouse_y;
+
+    event = MLV_get_event(&key, NULL, NULL, NULL, NULL,
+                         &mouse_x, &mouse_y, NULL, NULL);
+
+    if (event == MLV_KEY && key == MLV_KEYBOARD_ESCAPE) {
+        return 1;
+    }
+    return 0;
 }
 
 Queue* create_random_truck_path(List places, Matrix *matrix, int start_place_idx) {
@@ -169,116 +183,6 @@ Queue* create_random_truck_path(List places, Matrix *matrix, int start_place_idx
         }
     }
     return queue;
-}
-
-// TODO: NEED REFACTO : utiliser genetiquer function plusieurs fois pour éviter la ducplication
-void draw_genetic_evolution(List places, Matrix *dist, Matrix *time) {
-    int **population = first_models(places);
-    int **new_pop = malloc(sizeof(int *) * POP_INIT);
-    double *fitness = malloc(sizeof(double) * POP_INIT);
-
-    for (int i = 0; i < POP_INIT; i++) {
-        new_pop[i] = malloc(sizeof(int) * (places.size - 1));
-    }
-
-    int *best_solution = malloc(sizeof(int) * (places.size - 1));
-    Models *best_model = NULL;
-
-    for (int gen = 0; gen < GENERATION && appState != EXIT; gen++) {
-
-        eval_all_fitness(population, dist, places.size - 1, fitness);
-
-        int best_index = 0;
-        double best_fitness = fitness[0];
-        for (int i = 1; i < POP_INIT; i++) {
-            // TODO: A voir avec paul, car on doit trouver la distance la plus courte??
-            if (fitness[i] < best_fitness) {
-                best_fitness = fitness[i];
-                best_index = i;
-            }
-        }
-
-        for (int i = 0; i < places.size - 1; i++) {
-            best_solution[i] = population[best_index][i];
-        }
-
-        if (best_model) {
-            free_models(best_model);
-        }
-
-        best_model = list_to_models(time, places, best_solution, dist);
-
-        draw(places, best_model->list_truck, best_model->size);
-        draw_generation_info(gen, best_model->dist_tot, best_model->size);
-        draw_timer();
-        MLV_actualise_window();
-
-        printf("Generation %d: Best fitness = %.2f km, Trucks = %d\n",
-               gen, best_model->dist_tot / 1000.0, best_model->size);
-
-        for (int i = 0; i < POP_INIT; i += 2) {
-            int *parent1 = selection_tournoi(population, fitness, SIZE_TOURNAMENT);
-            int *parent2 = selection_tournoi(population, fitness, SIZE_TOURNAMENT);
-
-            crossover_pmx(parent1, parent2, new_pop[i], new_pop[i + 1], places.size - 1);
-
-            if ((double)rand() / RAND_MAX < MUTATION_PROBA) {
-                mutation_swap(new_pop[i], places.size - 1);
-            }
-            if ((double)rand() / RAND_MAX < MUTATION_PROBA) {
-                mutation_inversion(new_pop[i + 1], places.size - 1);
-            }
-        }
-
-        for (int i = 0; i < POP_INIT; i++) {
-            for (int j = 0; j < places.size - 1; j++) {
-                population[i][j] = new_pop[i][j];
-            }
-        }
-
-        MLV_Event event;
-        int mouse_x, mouse_y;
-        event = MLV_get_event(NULL, NULL, NULL, NULL, NULL,
-                             &mouse_x, &mouse_y, NULL, NULL);
-
-        if (event == MLV_KEY) {
-            MLV_Keyboard_button key;
-            MLV_get_event(&key, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-            if (key == MLV_KEYBOARD_ESCAPE) {
-                appState = EXIT;
-            }
-        }
-    }
-
-    if (best_model) {
-        printf("\n=== SOLUTION FINALE ===\n");
-        print_models(best_model);
-
-        appState = FINISHED;
-        while (appState != EXIT) {
-            MLV_Event event;
-            event = MLV_get_event(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-            if (event == MLV_KEY) {
-                MLV_Keyboard_button key;
-                MLV_get_event(&key, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-                if (key == MLV_KEYBOARD_ESCAPE) {
-                    appState = EXIT;
-                }
-            }
-        }
-    }
-
-    for (int i = 0; i < POP_INIT; i++) {
-        free(population[i]);
-        free(new_pop[i]);
-    }
-    free(population);
-    free(new_pop);
-    free(fitness);
-    free(best_solution);
-    if (best_model) {
-        free_models(best_model);
-    }
 }
 
 void graph_free() {
