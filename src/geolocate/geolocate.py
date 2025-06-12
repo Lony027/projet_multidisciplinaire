@@ -6,12 +6,19 @@ from dotenv import load_dotenv
 from InquirerPy import inquirer
 import openrouteservice
 
+# Emplacement du script actuel
+script_dir = os.path.dirname(os.path.abspath(__file__))
+print("script_dir:", script_dir)
+
 def choose_csv():
-    folder = "delivery"
+    # On revient dans le dossier parent de script_dir
+    folder = os.path.abspath(os.path.join(script_dir, "..","..", "delivery"))
+    print("folder:", folder)
+
     csv_files = [f for f in os.listdir(folder) if f.endswith(".csv")]
 
     if not csv_files:
-        raise FileNotFoundError("No CSV files found in the 'data' directory.")
+        raise FileNotFoundError("No CSV files found in the parent directory.")
 
     selected_file = inquirer.select(
         message="Choose a CSV file:",
@@ -50,7 +57,7 @@ df['full_address'] = df['street'] + ', ' + df['postalcode'].astype(str) + ' ' + 
 # REVERSE GEOCODE
 
 # Loading Cache
-cache_file = "src/geolocate/cache/cache_geocoding.csv"
+cache_file = os.path.join(script_dir,"cache","cache_geocoding.csv");
 if os.path.exists(cache_file):
     cache_df = pd.read_csv(cache_file)
 else:
@@ -82,7 +89,8 @@ df[['latitude', 'longitude']] = df['full_address'].progress_apply(
 )
 df = df.drop(columns=['full_address'])
 # all file path should be at the beginning!!
-geocoded_filename = "src/geolocate/output/geocoded_output.csv"
+geocoded_filename = os.path.join(script_dir,"output","geocoded_output.csv")
+
 df.to_csv(geocoded_filename, index=False)
 
 print("Reverse geocoded output saved to 'geocoded_output.csv'")
@@ -128,7 +136,12 @@ for i in trange(0, n, batch_size):
         except Exception as e:
             print(f"Unexpected error for block ({i}, {j}): {e}")
 
-pd.DataFrame(distance_matrix).to_csv("src/geolocate/output/distance_matrix.csv", index=False, header=False)
-pd.DataFrame(duration_matrix).to_csv("src/geolocate/output/duration_matrix.csv", index=False, header=False)
+distance_matrix_path = os.path.join(script_dir,"output","distance_matrix.csv")
+duration_matrix_path = os.path.join(script_dir,"output","duration_matrix.csv")
+pd.DataFrame(distance_matrix).to_csv(distance_matrix_path, index=False, header=False)
+pd.DataFrame(duration_matrix).to_csv(duration_matrix_path, index=False, header=False)
 
 print("Matrices saved to 'distance_matrix.csv' and 'duration_matrix.csv'")
+
+#output_dir = os.path.join(script_dir, "output")
+#os.makedirs(output_dir, exist_ok=True)  # Crée le dossier 'output' s'il n'existe pas
