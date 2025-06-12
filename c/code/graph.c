@@ -38,6 +38,8 @@ void get_coord_limits(List places, double *min_lon, double *max_lon,
         if (places.lst[i].coord.latitude > *max_lat) *max_lat = places.lst[i].coord.latitude;
     }
 
+    // marge de 10% pour éviter d'avoir des points aux bords de la zone de simulation
+    // ainsi la simulation est plus centrée
     double lon_margin = (*max_lon - *min_lon) * 0.1;
     double lat_margin = (*max_lat - *min_lat) * 0.1;
     *min_lon -= lon_margin;
@@ -49,7 +51,7 @@ void get_coord_limits(List places, double *min_lon, double *max_lon,
 void geo_to_screen(double lon, double lat, double min_lon, double max_lon,
                   double min_lat, double max_lat, int *x, int *y) {
 
-    // marge pour afficher du texte
+    // marge 50px de chaque côté (pour timer, info)
     int margin = 50;
     int usable_width = WINDOW_WIDTH - 2 * margin;
     int usable_height = WINDOW_HEIGHT - 2 * margin;
