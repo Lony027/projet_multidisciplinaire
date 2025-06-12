@@ -52,7 +52,9 @@ def modify_address(address):
 
     return address
 
+df['street'] = df['street'].apply(modify_address)
 df['full_address'] = df['street'] + ', ' + df['postalcode'].astype(str) + ' ' + df['city'] + ' France'
+
 
 # REVERSE GEOCODE
 
@@ -73,7 +75,7 @@ def get_coordinates(address):
         return cache_dict[address]
 
     try:
-        geocode = client.pelias_search(text=modify_address(address))
+        geocode = client.pelias_search(address)
         coords = geocode['features'][0]['geometry']['coordinates']
         lat, lon = coords[1], coords[0]
         cache_dict[address] = (lat, lon)
