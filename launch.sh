@@ -89,7 +89,7 @@ check_venv
 create_venv
 activate_venv
 install_deps
-#python3 src/geolocate/geolocate.py
-#make -C src/genetic
-#./src/genetic/main ; [ $? -eq 1 ] && echo "slt";
-python3 src/pdf_generator/pdf_generator.py
+python3 src/geolocate/geolocate.py
+make -C src/genetic
+./src/genetic/main ; [ $? -eq 1 ] && echo "slt";
+#python3 src/pdf_generator/pdf_generator.py

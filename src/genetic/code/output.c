@@ -5,7 +5,7 @@
 
 int create_output_csv(Models *model)
 {
-    FILE *output = fopen("src/genetic/output.csv", "w+");
+    FILE *output = fopen("src/genetic/output", "w+");
     if (output == NULL)
     {
         perror("Unable to open the file");

@@ -118,10 +118,10 @@ int main(int argc, char *argv[])
 {
     printf("bonjoir\n");
     srand(time(NULL));
-    // int graphic = 0;
+    int graphic = 0;
     if (argc == 2)
     {
-        // graphic = 1;
+        graphic = 1;
     }
     appState = RUNNING;
     List places = open_place_csv("src/geolocate/output/geocoded_output.csv");
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
     {
         return EXIT_FAILURE;
     }
-    Models *best = genetique(dist, places, time, 0);
+    Models *best = genetique(dist, places, time, graphic);
     print_models(best);
     create_output_csv(best);
 
