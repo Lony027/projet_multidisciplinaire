@@ -8,7 +8,7 @@ Queue *create_queue()
     new->dist = -1;
     new->last = NULL;
     new->first = NULL;
-    new->time = -1;
+    new->time = 0;
     return new;
 }
 
@@ -60,6 +60,24 @@ int enqueue(Appointment *new, Queue *queue, Matrix *matrix, Matrix *time)
     queue->time += dist_from_to(new->prev->place.num, new->place.num, time);
     queue->time += 1;
     return 1;
+}
+
+void recalculate_fitness(Queue *queue, Matrix *dista, Matrix *time)
+{
+    queue->dist = 0;
+    queue->time = 0;
+    if (queue->first == queue->last)
+    {
+        queue->dist = 0;
+        queue->time = 0;
+        return;
+    }
+    Appointment *tmp = queue->first;
+    for (; tmp->next; tmp = tmp->next)
+    {
+        queue->dist += dist_from_to(tmp->place.num, tmp->next->place.num, dista);
+        queue->time += dist_from_to(tmp->place.num, tmp->next->place.num, time);
+    }
 }
 
 Appointment *dequeue(Queue *queue, Matrix *matrix, Matrix *time)

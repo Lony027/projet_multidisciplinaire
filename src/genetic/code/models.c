@@ -58,12 +58,13 @@ int add_truck(Queue *queue, Models *models)
     models->time += queue->time;
     return 1;
 }
-void total_fit(Models *models)
+void total_fit(Models *models, Matrix *dista, Matrix *time)
 {
     models->dist_tot = 0;
     models->time = 0;
     for (int i = 0; i < models->size; i++)
     {
+        recalculate_fitness(models->list_truck[i], dista, time);
         models->dist_tot += models->list_truck[i]->dist;
         models->time += models->list_truck[i]->time;
     }
@@ -129,6 +130,6 @@ Models *list_to_models(Matrix *time, List place, int *parkour, Matrix *dist)
             }
         }
     }
-    total_fit(model);
+    total_fit(model, dist, time);
     return model;
 }

@@ -173,8 +173,6 @@ int main(int argc, char *argv[])
         graph_free();
     }
 
-    graph_free();
-
     free_list(&places);
     free_matrix(dist);
     free_matrix(time);

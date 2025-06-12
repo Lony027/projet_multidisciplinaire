@@ -13,6 +13,8 @@ typedef struct queue
     float time;
 } Queue;
 
+void recalculate_fitness(Queue *queue, Matrix *dista, Matrix *time);
+
 Queue *create_queue();
 int is_empty(Queue *queue);
 void free_queue(Queue *queue);
