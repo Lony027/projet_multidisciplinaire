@@ -168,7 +168,7 @@ void eval_all_fitness(int **population, Matrix *distance, int size, double *fitn
     }
 }
 
-Models *genetique(Matrix *distance, List place, Matrix *time_m, int is_graphic)
+Models *genetique(Matrix *distance, List place, Matrix *time_m, int is_graphic, int timer)
 {
     int **population = first_models(place);
     int **new_pop = malloc(sizeof(int *) * POP_INIT);
@@ -188,7 +188,7 @@ Models *genetique(Matrix *distance, List place, Matrix *time_m, int is_graphic)
 
     if (is_graphic)
     {
-        graph_init();
+        // graph_init();
         appState = RUNNING;
         start_time = MLV_get_time();
     }
@@ -197,10 +197,6 @@ Models *genetique(Matrix *distance, List place, Matrix *time_m, int is_graphic)
     time_t end;
     for (int gen = 0; (!is_graphic || appState != EXIT); gen++)
     {
-        if (!is_graphic)
-        {
-            printf("gen: %d\n", gen);
-        }
 
         eval_all_fitness(population, distance, place.size - 1, fitness);
 
@@ -230,7 +226,7 @@ Models *genetique(Matrix *distance, List place, Matrix *time_m, int is_graphic)
             {
 
                 free_models(best_model);
-                printf("%d, %d\n", tmp->dist_tot, best_model->dist_tot);
+                printf("%d, %d, gen: %d \n", tmp->dist_tot, best_model->dist_tot, gen);
                 best_model = tmp;
             }
             else
@@ -270,37 +266,18 @@ Models *genetique(Matrix *distance, List place, Matrix *time_m, int is_graphic)
                 population[i][j] = new_pop[i][j];
             }
         }
-
-        if (is_graphic && check_escape_event())
-        {
-            appState = EXIT;
-        }
-
+        //
+        // if (is_graphic && check_escape_event())
+        // {
+        // appState = EXIT;
+        // }
+        //
         end = time(NULL);
         unsigned long secondes = (unsigned long)difftime(end, start);
-        if (secondes > 55)
+        if (secondes > timer)
         {
             break;
         }
-    }
-
-    if (is_graphic)
-    {
-        if (best_model)
-        {
-            printf("\n=== SOLUTION FINALE ===\n");
-            print_models(best_model);
-
-            appState = FINISHED;
-            while (appState != EXIT)
-            {
-                if (check_escape_event())
-                {
-                    appState = EXIT;
-                }
-            }
-        }
-        graph_free();
     }
 
     for (int i = 0; i < POP_INIT; i++)

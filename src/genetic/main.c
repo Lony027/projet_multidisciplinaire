@@ -132,9 +132,48 @@ int main(int argc, char *argv[])
     {
         return EXIT_FAILURE;
     }
-    Models *best = genetique(dist, places, time, graphic);
+    if (graphic)
+    {
+        graph_init();
+    }
+    Models *best = genetique(dist, places, time, graphic, 5);
+    for (int i = 0; i < 10; i++)
+    {
+        Models *tmp = genetique(dist, places, time, graphic, 5);
+        if (tmp->dist_tot < best->dist_tot)
+        {
+            free_models(best);
+            best = tmp;
+        }
+        else
+        {
+            free_models(tmp);
+        }
+    }
+
+    // Models *best = genetique(dist, places, time, graphic, 5);
     print_models(best);
     create_output_csv(best);
+    if (graphic)
+    {
+        if (best)
+        {
+            printf("\n=== SOLUTION FINALE ===\n");
+            print_models(best);
+
+            appState = FINISHED;
+            while (appState != EXIT)
+            {
+                if (check_escape_event())
+                {
+                    appState = EXIT;
+                }
+            }
+        }
+        graph_free();
+    }
+
+    graph_free();
 
     free_list(&places);
     free_matrix(dist);

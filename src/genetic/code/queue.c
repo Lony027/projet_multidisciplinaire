@@ -28,6 +28,7 @@ void print_queue(Queue *queue)
         printf("the queue is empty\n");
         return;
     }
+    printf("dist %d time %f size %d \n", queue->dist, queue->time / 3600, queue->size);
     Appointment *tmp = queue->first;
     for (; tmp; tmp = tmp->next)
     {
@@ -49,6 +50,7 @@ int enqueue(Appointment *new, Queue *queue, Matrix *matrix, Matrix *time)
         queue->last = new;
         queue->dist = 0;
         queue->time = 0;
+        queue->size = 1;
         return 1;
     }
     queue->last->next = new;
@@ -56,6 +58,7 @@ int enqueue(Appointment *new, Queue *queue, Matrix *matrix, Matrix *time)
     queue->last = new;
     queue->dist += dist_from_to(new->prev->place.num, new->place.num, matrix);
     queue->time += dist_from_to(new->prev->place.num, new->place.num, time);
+    queue->time += 1;
     return 1;
 }
 
@@ -72,6 +75,8 @@ Appointment *dequeue(Queue *queue, Matrix *matrix, Matrix *time)
         queue->last = NULL;
         queue->dist = -1;
         tmp->prev = NULL;
+        queue->time = -1;
+        queue->size = 0;
         return tmp;
     }
     Appointment *tmp = queue->last;
@@ -80,6 +85,7 @@ Appointment *dequeue(Queue *queue, Matrix *matrix, Matrix *time)
     tmp->prev = NULL;
     queue->dist -= dist_from_to(queue->last->place.num, tmp->place.num, matrix);
     queue->time -= dist_from_to(queue->last->place.num, tmp->place.num, time);
+    queue->size -= 1;
     return tmp;
 }
 

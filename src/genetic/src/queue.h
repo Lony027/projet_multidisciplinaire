@@ -9,6 +9,7 @@ typedef struct queue
     int dist;
     Appointment *first;
     Appointment *last;
+    int size;
     float time;
 } Queue;
 

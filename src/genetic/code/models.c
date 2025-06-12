@@ -58,7 +58,16 @@ int add_truck(Queue *queue, Models *models)
     models->time += queue->time;
     return 1;
 }
-
+void total_fit(Models *models)
+{
+    models->dist_tot = 0;
+    models->time = 0;
+    for (int i = 0; i < models->size; i++)
+    {
+        models->dist_tot += models->list_truck[i]->dist;
+        models->time += models->list_truck[i]->time;
+    }
+}
 int delete_truck(Models *models, int num_of_truck)
 {
     if (num_of_truck > models->size)
@@ -93,6 +102,7 @@ Models *list_to_models(Matrix *time, List place, int *parkour, Matrix *dist)
             Appointment *step = create_appointment(place.lst[indice]);
             Appointment *end = create_appointment(place.lst[0]);
             enqueue(base, new, dist, time);
+            new->time += 3 * 60;
             enqueue(step, new, dist, time);
             enqueue(end, new, dist, time);
             add_truck(new, model);
@@ -105,6 +115,7 @@ Models *list_to_models(Matrix *time, List place, int *parkour, Matrix *dist)
             Appointment *step = create_appointment(place.lst[indice]);
             enqueue(step, model->list_truck[current_truck], dist, time);
             enqueue(end, model->list_truck[current_truck], dist, time);
+            model->list_truck[current_truck]->time += 3 * 60;
             if (model->list_truck[current_truck]->time > 3600 * 3)
             {
                 end = dequeue(model->list_truck[current_truck], dist, time);
@@ -113,9 +124,11 @@ Models *list_to_models(Matrix *time, List place, int *parkour, Matrix *dist)
                 free_appointment(step);
                 enqueue(end, model->list_truck[current_truck], dist, time);
                 i -= 1;
+                model->list_truck[current_truck]->time -= 3 * 60;
                 new_truck = 1;
             }
         }
     }
+    total_fit(model);
     return model;
 }
