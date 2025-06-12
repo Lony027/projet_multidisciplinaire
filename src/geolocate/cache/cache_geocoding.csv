@@ -1,4 +1,5 @@
 full_address,latitude,longitude
+"600 Rue des Madeleines, 77100 Mareuil-lès-Meaux France",48.934926,2.874246
 "56 Av. du Président John Kennedy, 60800 Crépy-en-Valois France",49.229881,2.888188
 "2-4 Pl. Charles de Gaulle, 77540 Rozay-en-Brie France",48.683388,2.957143
 "4 Rue de Rebais, 77169 Boissy-le-Châtel France",48.825186,3.14417
@@ -39,7 +40,7 @@ full_address,latitude,longitude
 "1 Pl. de l'Église Saint-Denis, 77320 Beton-Bazoches France",48.701927,3.24437
 "1 Rue de la République, 77122 Monthyon France",49.009659,2.83118
 "26 Rue Couperin, 77390 Chaumes-en-Brie France",48.665215,2.841935
-"ZAC vaux, 4 Pl. de l'Île de France, 77120 Coulommiers France",48.80619,3.078466
+"4 Pl. de l'Île de France, 77120 Coulommiers France",48.80619,3.078466
 "58 Rue Fbg Saint-Nicolas, 77100 Meaux France",48.958136,2.884664
 "8 Rue Marcel Sembat, 77390 Verneuil-l'Étang France",48.64315,2.836202
 "40 Rue de la Clef des Champs, 77700 Magny-le-Hongre France",48.857475,2.813455
@@ -77,11 +78,10 @@ full_address,latitude,longitude
 "26 Grande Rue, 77580 Guérard France",48.820937,2.958824
 "6 Bd des Sports, 77700 Bailly-Romainvilliers France",48.849982,2.81965
 "15 bis Rue Raymond Poincaré, 77660 Saint-Jean-les-Deux-Jumeaux France",48.950984,3.021592
-"24 Av. de la Font du Berger, 77230 Saint-Mard France",49.038466,2.683187
+"24 Av. de la Fontaine du Berger, 77230 Saint-Mard France",49.038466,2.683187
 "54 Bd Victor Hugo, 77220 Gretz-Armainvilliers France",48.738947,2.720003
 "85 Grande Rue, 77135 Pontcarré France",48.796652,2.705915
 "5 place Révolution, 77680 Roissy en Brie France",48.793373,2.653159
 "8 Rue Georges Faroy, 77515 Faremoutiers France",48.801006,2.985533
 "Rue Gérard de Nerval, 77280 Othis France",49.072507,2.676166
 "Avenue Fridingen, 77100 Nanteuil-lès-Meaux France",48.936769,2.883447
-"600 Rue des Madeleines, 77100 Mareuil-lès-Meaux France",48.934926,2.874246

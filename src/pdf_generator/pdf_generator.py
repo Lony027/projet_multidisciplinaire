@@ -11,24 +11,22 @@ from PIL import Image
 from fpdf import FPDF
 from fpdf.enums import XPos, YPos
 
-# --- Constants ---
+# CONSTANTS
 START_TIME = datetime.strptime("09:00", "%H:%M")
 STOP_DURATION = timedelta(minutes=3)
-WAREHOUSE_INDEX = 0
 
 FUEL_CONSUMPTION_L_PER_100KM = 8.5
 FUEL_PRICE_EUR_PER_L = 1.72
 
 MAX_MAP_WIDTH_MM = 120
-PDF_WIDTH_MM = 210  # A4 size in mm
+PDF_WIDTH_MM = 210
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", "..")) 
 
 FONT_PATH = os.path.join(BASE_DIR, "fonts", "DejaVuSans.ttf")
 FONT_BOLD_PATH = os.path.join(BASE_DIR, "fonts", "DejaVuSans-Bold.ttf")
 FONT_NAME = "DejaVu"
-
-
 
 COLORS = [
     "#e6194b", "#3cb44b", "#ffe119", "#4363d8", "#f58231", "#911eb4",
@@ -36,27 +34,36 @@ COLORS = [
     "#9a6324", "#fffac8", "#800000", "#aaffc3", "#808000", "#ffd8b1"
 ]
 
-# --- Load data ---
 PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", "..")) 
 
-routes = pd.read_csv("src/genetic/output.csv", header=None)
-locations = pd.read_csv(os.path.join(PROJECT_ROOT , "src", "geolocate", "output", "geocoded_output.csv"))
+#LOAD DATA
+
+with open(os.path.join(PROJECT_ROOT, "src", "genetic", "output.csv")) as f:
+    routes = [line.strip().split(",") for line in f if line.strip()]
+
+
+locations = pd.read_csv(os.path.join(PROJECT_ROOT, "src", "geolocate", "output", "geocoded_output.csv"))
 time_matrix = pd.read_csv(os.path.join(PROJECT_ROOT, "src", "geolocate", "output", "duration_matrix.csv"), header=None)
 distance_matrix = pd.read_csv(os.path.join(PROJECT_ROOT, "src", "geolocate", "output", "distance_matrix.csv"), header=None)
 
 global_routes = []  # Pour les lignes
 global_summary = []  # Pour les stats
+all_points = []  # Pour stocker tous les points de passage
 
 # --- Helper ---
 def format_time(t: datetime) -> str:
     return t.strftime("%Hh%M")
 
 # --- Process each route ---
-for i, route in routes.iterrows():
-    route_indices = route.dropna().astype(int).tolist()
+for i, route in enumerate(routes):
+    route_indices = list(map(int, route))
     lats = [locations.iloc[idx]['latitude'] for idx in route_indices]
     longs = [locations.iloc[idx]['longitude'] for idx in route_indices]
-
+    
+    # Add points to global collection
+    for idx in route_indices:
+        all_points.append(Point(locations.iloc[idx]['longitude'], locations.iloc[idx]['latitude']))
+    
     # Initialize PDF
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
@@ -109,11 +116,19 @@ for i, route in routes.iterrows():
     os.remove(map_filename)
 
     # Table Headers
+    pdf.ln(5)
     pdf.set_font(FONT_NAME, 'B', 8)
-    pdf.cell(50, 10, "Étape", 1)
-    pdf.cell(90, 10, "Adresse", 1)
-    pdf.cell(25, 10, "Arrivé", 1)
-    pdf.cell(25, 10, "Départ", 1)
+    
+    # Définir les largeurs des colonnes
+    col_width_etape = 50
+    col_width_adresse = 90
+    col_width_time = 25
+    row_height = 8  # Hauteur fixe pour les cellules, augmentée pour plus de consistance
+    
+    pdf.cell(col_width_etape, row_height, "Étape", 1)
+    pdf.cell(col_width_adresse, row_height, "Adresse", 1)
+    pdf.cell(col_width_time, row_height, "Arrivé", 1)
+    pdf.cell(col_width_time, row_height, "Départ", 1)
     pdf.ln()
 
     # Route Details
@@ -142,32 +157,60 @@ for i, route in routes.iterrows():
         address = f"{row['street']} {row['postalcode']} {row['city']}"
         name = (
             "Départ " + row['name'] if is_first else
-            "Retour " + row['name'] if is_last and idx == WAREHOUSE_INDEX else
+            "Retour " + row['name'] if is_last and idx == 0 else
             row['name']
         )
 
+        # Calculer combien de lignes nécessaires pour le texte
+        name_lines = max(1, len(name) // 20 + (1 if len(name) % 20 > 0 else 0))
+        address_lines = max(1, len(address) // 35 + (1 if len(address) % 35 > 0 else 0))
+        max_lines = max(name_lines, address_lines)
+        
+        # Hauteur minimale garantie avec un peu plus d'espace
+        cell_height = max(row_height, row_height * max_lines + 2)
+        
+        # Sauvegarder la position X
+        x_start = pdf.get_x()
         y_start = pdf.get_y()
-        pdf.multi_cell(50, 10, name, border=1)
-        y_mid = pdf.get_y()
-        pdf.set_y(y_start)
-        pdf.set_x(60)
-        pdf.multi_cell(90, 10, address, border=1)
-        y_end = max(pdf.get_y(), y_mid)
-        pdf.set_y(y_start)
-        pdf.set_x(150)
-        pdf.cell(25, 10, format_time(arrival_time) if arrival_time else "", border=1)
-        pdf.cell(25, 10, format_time(departure_time) if departure_time else "", border=1)
-        pdf.ln(y_end - y_start)
+        
+        # Vérifier si on a besoin d'une nouvelle page
+        if y_start + cell_height > pdf.page_break_trigger:
+            pdf.add_page()
+            y_start = pdf.get_y()
+        
+        # Créer une fonction pour dessiner des cellules de hauteur fixe
+        def draw_filled_cell(x, y, width, height, txt, border=1):
+            pdf.set_xy(x, y)
+            # Dessiner un rectangle plein
+            pdf.cell(width, height, "", border)
+            # Placer le texte au milieu
+            pdf.set_xy(x, y + (height - row_height) / 2)
+            # Utiliser une hauteur de ligne plus petite pour éviter le débordement
+            line_height = min(row_height, height / max_lines)
+            pdf.multi_cell(width, line_height, txt, 0)
+        
+        # Étape
+        draw_filled_cell(x_start, y_start, col_width_etape, cell_height, name)
+        
+        # Adresse
+        draw_filled_cell(x_start + col_width_etape, y_start, col_width_adresse, cell_height, address)
+        
+        # Arrivée
+        draw_filled_cell(x_start + col_width_etape + col_width_adresse, y_start, 
+                        col_width_time, cell_height, format_time(arrival_time) if arrival_time else "")
+        
+        # Départ
+        draw_filled_cell(x_start + col_width_etape + col_width_adresse + col_width_time, y_start, 
+                        col_width_time, cell_height, format_time(departure_time) if departure_time else "")
+        
+        # Positionner à la ligne suivante
+        pdf.set_y(y_start + cell_height)
 
         if not is_last:
             current_time = departure_time
             prev_index = idx
 
-
-
     # Summary
-    # pdf.ln(5)
-    # pdf.set_font(FONT_NAME, 'B', 10)
     total_km = total_distance_m / 1000
     fuel_l = (total_km * FUEL_CONSUMPTION_L_PER_100KM) / 100
     fuel_cost = fuel_l * FUEL_PRICE_EUR_PER_L
@@ -189,10 +232,6 @@ for i, route in routes.iterrows():
         "fuel_cost": fuel_cost,
     })
 
-    # pdf.cell(0, 10, f"Distance totale parcourue : {total_km:.1f} km", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-    # pdf.cell(0, 10, f"Carburant estimé : {fuel_l:.2f} L (8.5 L / 100km)", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-    # pdf.cell(0, 10, f"Coût carburant estimé : {fuel_cost:.2f} € (1.72 €/L)", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-
     # Save PDF
     pdf.output(f"parcours_camionnette_{i+1}.pdf")
 
@@ -202,17 +241,18 @@ fig, ax = plt.subplots(figsize=(10, 10))
 
 legend_elements = []
 
-# Ajouter les points de passage
-all_points = []
-for route in routes.itertuples(index=False):
-    indices = pd.Series(route).dropna().astype(int).tolist()
-    for idx in indices:
-        point = Point(locations.iloc[idx]['longitude'], locations.iloc[idx]['latitude'])
-        all_points.append(point)
-
-
+# Créer un GeoDataFrame avec tous les points
 points_gdf = gpd.GeoDataFrame(geometry=all_points, crs="EPSG:4326").to_crs(epsg=3857)
 
+# Définir les limites de la carte
+x_min, y_min, x_max, y_max = points_gdf.total_bounds
+max_range = max(x_max - x_min, y_max - y_min) * 1.2
+x_center, y_center = (x_min + x_max) / 2, (y_min + y_max) / 2
+half_range = max_range / 2
+ax.set_xlim(x_center - half_range, x_center + half_range)
+ax.set_ylim(y_center - half_range, y_center + half_range)
+
+# Ajouter les routes au graphique
 for route in global_routes:
     gpd.GeoSeries([route["geometry"]], crs="EPSG:3857").plot(
         ax=ax,
@@ -228,20 +268,6 @@ points_gdf.plot(ax=ax, marker='o', color='black', markersize=20)
 ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
 ax.axis("off")
 ax.legend(handles=legend_elements, loc='upper left', fontsize='small')
-
-# # Générer la carte globale
-# all_lines = gpd.GeoDataFrame(geometry=global_routes, crs="EPSG:3857")
-# fig, ax = plt.subplots(figsize=(10, 10))
-# all_lines.plot(ax=ax, linewidth=2.5, alpha=0.7)
-
-
-
-# points_gdf = gpd.GeoDataFrame(geometry=all_points, crs="EPSG:4326").to_crs(epsg=3857)
-# points_gdf.plot(ax=ax, marker='o', color='red', markersize=25)
-
-# ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
-# ax.axis('off')
-
 
 global_map_path = "carte_globale.png"
 plt.savefig(global_map_path, bbox_inches="tight", dpi=150)
@@ -284,21 +310,18 @@ total_fuel = 0
 total_cost = 0
 
 for item in global_summary:
-    pdf_global.cell(0, 8, f"{item['camionnette']} - {item['distance_km']:.1f} km, "
-                          f"{item['fuel_l']:.2f} L, {item['fuel_cost']:.2f} €", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     total_distance += item["distance_km"]
     total_fuel += item["fuel_l"]
     total_cost += item["fuel_cost"]
 
-# Résumé global total
-pdf_global.ln(5)
+# Détails supplémentaires
 pdf_global.set_font(FONT_NAME, 'B', 10)
-pdf_global.cell(0, 10, f"Distance totale parcourue : {total_distance:.1f} km", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-pdf_global.cell(0, 10, f"Carburant estimé : {total_fuel:.2f} L (8.5 L / 100km)", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-pdf_global.cell(0, 10, f"Coût carburant estimé : {total_cost:.2f} € (1.72 €/L)", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+pdf_global.ln(5)
+pdf_global.cell(0, 10, f"Distance totale : {total_distance:.0f} km", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+pdf_global.cell(0, 10, f"Consommation estimée : {total_fuel:.2f}L (8.5 L / 100km)", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+pdf_global.cell(0, 10, f"Prix du carburant : {fuel_cost:.2f} € (diesel : 1.72 €/L)", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
 
 # Sauver le PDF global
 pdf_global.output("parcours_global.pdf")
 
-
-print("PDFs générés pour chaque camionnette.")
+print("PDFs générés pour chaque camionnette et PDF global.")
