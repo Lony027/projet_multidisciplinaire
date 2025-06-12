@@ -2,3 +2,5 @@
 .vscode/*
 .venv/*
 .pdf
+.vscode
+.history
