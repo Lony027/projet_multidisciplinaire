@@ -26,6 +26,12 @@ To run the program, execute the following command from the root of the project:
 ./launch.sh
 ```
 
+If you want to enable route visualization for debugging purposes (used in the genetic algorithm), you can pass the -G flag as an argument:
+
+```bash
+./launch.sh -G
+```
+
 Make sure the script has executable permissions. If needed, run:
 
 ```bash
