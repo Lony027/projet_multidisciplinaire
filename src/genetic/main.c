@@ -7,6 +7,7 @@
 #include "src/output.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <MLV/MLV_window.h>
 #include "src/genetique.h"
@@ -116,19 +117,18 @@ AppState appState;
 
 int main(int argc, char *argv[])
 {
-    
+
     srand(time(NULL));
     int graphic = 0;
-    if (argc == 2)
+    if (argc == 2 && strcmp("-G", argv[0]))
     {
         graphic = 1;
     }
     appState = RUNNING;
     List places = open_place_csv("src/geolocate/output/geocoded_output.csv");
-    
+
     Matrix *dist = open_csv_matrix("src/geolocate/output/distance_matrix.csv");
     Matrix *timed = open_csv_matrix("src/geolocate/output/duration_matrix.csv");
-    print_matrix(timed);
     if (!dist || !timed)
     {
         return EXIT_FAILURE;
@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
     {
         if (best)
         {
-            printf("\n=== SOLUTION FINALE ===\n");
+            printf("\n=== BEST SOLUTION  ===\n");
             print_models(best);
 
             appState = FINISHED;

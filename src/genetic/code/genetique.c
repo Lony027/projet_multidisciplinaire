@@ -273,7 +273,7 @@ Models *genetique(Matrix *distance, List place, Matrix *time_m, int is_graphic, 
         //
         end = time(NULL);
         unsigned long secondes = (unsigned long)difftime(end, start);
-        if (secondes > timer)
+        if (secondes > (long unsigned int)timer)
         {
             break;
         }
