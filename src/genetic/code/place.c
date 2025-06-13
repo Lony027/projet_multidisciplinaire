@@ -44,12 +44,11 @@ List open_place_csv(char *file_name)
 {
 
     FILE *f = fopen(file_name, "r");
-    
+
     if (!f)
     {
         exit(1);
     }
-    printf("tu ouvres");
     int size = -1;
     char buffer[1000];
     while (fgets(buffer, 1000, f))
